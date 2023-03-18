@@ -220,7 +220,7 @@ public class NameJudging {
 		String lastObjectName = nameList.get(nameList.size() - 1);
 
 		String[] dirALastStops = { MM06, Y24, SO18, SO37 };
-		if (Arrays.asList(dirALastStops).stream().anyMatch(sta -> sta.equals(firstObjectName))) {
+		if (Arrays.asList(dirALastStops).stream().anyMatch(sta -> sta.equals(lastObjectName))) {
 			return true;
 		} else if (Arrays.asList(dirALastStops).stream().anyMatch(sta -> sta.equals(firstObjectName))) {
 			return false;
