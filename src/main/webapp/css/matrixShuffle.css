@@ -1,0 +1,53 @@
+@charset "UTF-8";
+
+.tableShuffle th {
+	background-color: #555;
+	color: #fff;
+	width: 200px;
+}
+
+.tableShuffle thead {
+	display: flex;
+	position: relative;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.tableShuffle td {
+	width: 100px;
+}
+
+.tableShuffle th, .tableShuffle td {
+	height: 26px;
+	text-align: left;
+	padding-top: 0px;
+	padding-left: 4px;
+	padding-right: 4px;
+	padding-bottom: 4px;
+	white-space: nowrap;
+}
+
+.tableShuffle table {
+	display: flex;
+}
+
+.tableShuffle tbody {
+	display: flex;
+	position: relative;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+.tableShuffle th, .tableShuffle td {
+	display: block;
+}
+
+.tableaction th, .tableaction td {
+	height: 36px;
+	text-align: left;
+	padding-top: 0px;
+	padding-left: 4px;
+	padding-right: 4px;
+	padding-bottom: 4px;
+	white-space: nowrap;
+}

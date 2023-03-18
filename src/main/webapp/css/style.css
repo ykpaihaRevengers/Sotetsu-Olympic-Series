@@ -1,0 +1,48 @@
+@charset "UTF-8";
+
+.input {
+	float: left;
+	display: inline-block;
+	text-align: center;
+	line-height: 100px;
+	width: 30%;
+	height: 100px;
+	background-color: #666;
+	color: #fff;
+}
+
+.selection {
+	float: left;
+	display: inline-block;
+	text-align: center;
+	line-height: 100px;
+	width: 50%;
+	height: 100px;
+	background-color: #666;
+	color: #fff;
+}
+
+.inline-block_bottun {
+	display: inline-block; /* インラインブロック要素にする */
+	background-color: #ccc; /* 背景色指定 */
+}
+
+.display_flex {
+	display: flex;
+}
+
+.fileBackGround {
+	display: inline-block;
+	background-color: #f5eaa2;
+}
+
+table {
+    border : 1px solid;
+}
+th {
+    border : 1px solid;
+    background-color : #FF9900;
+}
+td {
+    border : 1px solid;
+}
