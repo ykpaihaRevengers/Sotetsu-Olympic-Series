@@ -31,15 +31,13 @@
 	<hr>
 	<table border="1">
 		<tr>
-			<td>テーブル名</td>
-			<td>リンク</td>
-			<td></td>
-			<td>全データ確認</td>
-			<td></td>
-			<td>テーブルの削除</td>
-			<td>テーブル名の変更</td>
-
-
+			<th>テーブル名</th>
+			<th>リンク</th>
+			<th></th>
+			<th>全データ確認</th>
+			<th></th>
+			<th>テーブルの削除</th>
+			<th>テーブル名の変更</th>
 		</tr>
 		<c:forEach items="${table_names}" var="table">
 			<tr>

@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletRequest;
 import home.servlet.MainServlet;
 import home.tool.FileUtils;
 import home.tool.ScenarioUtil;
+import usr.УкраїнаRevengers.bean.ManuscriptScedule;
+import usr.УкраїнаRevengers.bean.ScheduleTag;
 
 public class TextBook {
 	private static final String SPLITARRAY = "/splitArray/";
@@ -25,6 +27,10 @@ public class TextBook {
 	private List<List<String>> fileTextSeveral;
 
 	private String ordinalCode;
+
+	protected enum TextConnectionType {
+		ahead, behind
+	}
 
 	public TextBook(Path fileFullPath) {
 		super();
@@ -256,8 +262,29 @@ public class TextBook {
 		return fileTextSeveral;
 	}
 
-	protected enum TextConnectionType {
-		ahead, behind
-	}
+	public ManuscriptScedule arrangeTextBook() {
 
+		boolean firstText = true;
+		ManuscriptScedule manuSchedule = new ManuscriptScedule();
+		List<ScheduleTag> scheduleTags = new ArrayList<>();
+		for (String text : this.getFileText()) {
+			String[] manuscriptArray = text.split(",");
+			if (manuscriptArray.length == 2) {
+				if (firstText) {
+					scheduleTags.add(new ScheduleTag(manuscriptArray[1], null, (manuscriptArray[0])));
+					firstText = false;
+				} else {
+					scheduleTags.add(new ScheduleTag(manuscriptArray[1], (manuscriptArray[0])));
+				}
+			}
+			if (manuscriptArray.length == 3) {
+				scheduleTags.add(new ScheduleTag(manuscriptArray[2], (manuscriptArray[0]), (manuscriptArray[1])));
+			}
+		}
+
+		manuSchedule.setScheduleTags(scheduleTags);
+		manuSchedule.setCode(this.getOrdinalCode(), ScenarioUtil.mappingArrayList(scheduleTags, scheduleTag -> scheduleTag.getName().trim()));
+
+		return manuSchedule;
+	}
 }

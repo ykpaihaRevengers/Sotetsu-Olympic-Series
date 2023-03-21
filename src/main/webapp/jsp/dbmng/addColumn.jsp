@@ -12,11 +12,11 @@
 		<p>カラムの追加</p>
 		<table>
 			<tr>
-				<td>カラム名</td>
-				<td>DBタイプ</td>
-				<td>文字数の指定</td>
-				<td>NOT NULL</td>
-				<td>デフォルト値</td>
+				<th>カラム名</th>
+				<th>DBタイプ</th>
+				<th>文字数の指定</th>
+				<th>NOT NULL</th>
+				<th>デフォルト値</th>
 			</tr>
 			<c:forEach var="i" begin="1" end="10" step="1">
 				<tr>

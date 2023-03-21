@@ -18,10 +18,16 @@
 		<form action="/base/DataBaseServlet?action=readSQL" method="post">
 			<input type="submit" style="color: #ffffff; background-color: #987654;" value="SQLに反映する"> <input type="hidden" name="page" value="dbmng/checkSQLfromText.jsp">
 		</form>
-	</div>
+		<form action="/base/DataBaseServlet?action=individualProcessing" method="post">
+			<input type="submit" style="color: #ffffff; background-color: #abcdef;" value="ファイルをダイレクト処理する"> <input type="hidden" name="init" value="init"> <input type="hidden" name="process"
+				value="edit_quickly"> <input type="hidden" name="table_name" value="file_edition"> <input type="hidden" name="page" value="filemng/editFile.jsp"> <input type="hidden" name="edition" value="execute_file">
+		</form>
+		<form action="/base/DataBaseServlet?action=individualProcessing" method="post">
+			<input type="submit" style="color: #ffffff; background-color: #E219B8;" value="ファイルからDBに直接反映する"> <input type="hidden" name="init" value="init"> <input type="hidden" name="process"
+				value="insert_quickly"> <input type="hidden" name="table_name" value="file_edition"> <input type="hidden" name="page" value="filemng/editFile.jsp"> <input type="hidden" name="edition" value="execute_file">
+		</form>	</div>
 
 	<p>
-	<jsp:include page="/jsp/filemng/fileText.jsp"></jsp:include>
-
+		<jsp:include page="/jsp/filemng/fileText.jsp"></jsp:include>
 </body>
 </html>

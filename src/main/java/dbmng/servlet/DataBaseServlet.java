@@ -55,6 +55,8 @@ public class DataBaseServlet extends MainServlet {
 
 	private static final String SELECT_JSP = "select.jsp";
 
+	private static final String DEFAULT_EDITION_CODE = "1";
+
 	/**
 	 * @see HttpServlet#HttpServlet()
 	 */
@@ -539,6 +541,32 @@ public class DataBaseServlet extends MainServlet {
 			session.setAttribute("file_list", fileList);
 
 			return "登録した編集方法を読み込みました。";
+		}
+		if (getRequestParameter(request, "process").endsWith("quickly")) {
+			ExecuteQuery select = new ExecuteQuery(getRequestParameter(request, "table_name"), dao);
+			select.setFilter("code", MainDAO.EQUALS, DEFAULT_EDITION_CODE);
+			List<Map<String, Object>> dbDataList = dao.select(select);
+			List<FileEdition> editions = ScenarioUtil.mappingArrayList(dbDataList, data -> new FileEdition((Integer) data.get("code"), (String) data.get("pattern"),
+					(String) data.get("filter_value"), (String) data.get("function"), (String) data.get("replaced_value")));
+			fileList.setFileEditions(editions);
+			session.setAttribute("file_list", fileList);
+
+			//登録した編集方法でファイルを編集
+			List<TextBook> bookList = fileList.getBookList();
+			bookList.stream().forEachOrdered(book -> book.editTextbookByOrdered(request, editions));
+			fileList.setBookList(bookList);
+
+			if (getRequestParameter(request, "process").equals("insert_quickly")) {
+				Insert insert = new Insert("schedule_manuscript", dao);
+				ScenarioUtil.mappingArrayList(fileList.getBookList(), book -> book.arrangeTextBook())
+						.stream().map(schedule -> schedule.createInsertValues()).flatMap(list -> list.stream()).forEachOrdered(insert::setInsertValue);
+				String result = dao.insert(insert);
+				request.setAttribute("execute_msg", "DBへの反映が" + result + "件反映されました。");
+			} else if (getRequestParameter(request, "process").equals("edit_quickly")) {
+				request.setAttribute("disable", "disable");
+			}
+
+			return "デフォルトでファイルを編集しました。";
 		}
 
 		return "";

@@ -15,7 +15,7 @@
 		<input type="submit" style="color: #ffffff; background-color: #99a677;" value="登録データの閲覧"> <input type="hidden" name="page" value="select.jsp">
 	</form>
 	<form action="/base/FittingServlet?action=createTableByManuscriptInsert" method="post">
-		<input type="submit" style="color: #ffffff; background-color: #99a677;" value="登録データによるテーブルの作成"> <input type="hidden" name="page" value="select.jsp">
+		<input type="submit" style="color: #ffffff; background-color: #5F4894;" value="登録データによるテーブルの作成"> <input type="hidden" name="page" value="individual/checkTableList.jsp">
 	</form>
 
 	<form action="/base/DataBaseServlet?action=truncate_table" method="post">
@@ -29,7 +29,11 @@
 			name="page" value="select.jsp">
 	</form>
 	<br />
-	<c:if test="${!empty showTables}">
+	<c:if test="${!empty deployed_schedule_list}">
+		<jsp:include page="/jsp/individual/deployed_schedule_list.jsp"></jsp:include>
+	</c:if>
+	<br />
+	<c:if test="${!empty table_names}">
 		<jsp:include page="/jsp/individual/efuPAIHA_TABLEs.jsp"></jsp:include>
 	</c:if>
 	<br />

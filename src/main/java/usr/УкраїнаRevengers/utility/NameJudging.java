@@ -8,72 +8,7 @@ import java.util.stream.Collectors;
 import dbmng.bean.Column;
 import home.tool.ScenarioUtil;
 
-public class NameJudging {
-
-	static final String Tokyo2020_Olympic_Gateway = "羽沢横浜国大";
-	static final String SJK = "新宿";
-	static final String BKLO = "池袋";
-	static final String COTH = "武蔵小杉";
-
-	static final String TY01 = "渋谷";
-	static final String TY05 = "学芸大学";
-	static final String TY07 = "自由が丘";
-	static final String TY16 = "菊名";
-	static final String MM06 = "元町・中華街";
-	static final String Y21 = "月島";
-	static final String Y24 = "新木場";
-	static final String F13 = "新宿三丁目";
-	static final String F12 = "東新宿";
-
-	static final String YF06 = "小竹向原";
-	static final String YF07 = "千川";
-	static final String YF08 = "要町";
-
-	static final String MG01 = "目黒";
-	static final String MG13 = "日吉（神奈川県）";
-	static final String NI03 = "白金高輪";
-
-	static final String N19 = "赤羽岩淵";
-	static final String N17 = "王子神谷";
-	static final String SO18 = "海老名（相鉄・小田急）";
-
-	static final String I27 = "西高島平";
-	static final String I25 = "高島平";
-	static final String SO37 = "湘南台";
-
-	static final String TJ30 = "森林公園（埼玉県）";
-	static final String TJ28 = "高坂";
-	static final String TJ07 = "上板橋";
-	static final String TJ10 = "成増";
-	static final String TJ12 = "朝霞";
-	static final String TJ13 = "朝霞台";
-	static final String TJ14 = "志木";
-	static final String TJ22 = "川越市";
-	static final String TJ33 = "小川町（埼玉県）";
-
-	static final String SI06 = "練馬";
-	static final String SI10 = "石神井公園";
-	static final String SI12 = "保谷";
-	static final String SI16 = "秋津";
-
-	static final String SI39 = "豊島園（西武線）";
-	static final String SI17 = "所沢";
-	static final String SI26 = "飯能";
-	static final String SI36 = "西武秩父";
-	static final String SI41 = "西武球場前";
-
-	static final String SO01 = "横浜";
-	static final String SO09 = "鶴ケ峰";
-	static final String SO10 = "二俣川";
-	static final String SO11 = "希望ケ丘";
-
-	//JudgeIsLocal
-	static final String TY02 = "代官山";
-	static final String MG09 = "奥沢";
-	static final String SO03 = "西横浜";
-	static final String SI07 = "中村橋";
-
-	static final String TJ04 = "大山（東京都）";
+public class NameJudging implements NumberingNameList {
 
 	public enum CodeHeader {
 		TY, MG, SO, YF, SI, TJ, 五輪
@@ -85,17 +20,17 @@ public class NameJudging {
 	}
 
 	public enum Direction {
-		lA, lB, єA, єB;
+		lA, lB, eA, eB;
 
 		public Direction exchangeAB(Direction aORb) {
 			if (aORb.equals(lA)) {
 				return Direction.lB;
 			} else if (aORb.equals(lB)) {
 				return Direction.lA;
-			} else if (aORb.equals(єA)) {
-				return Direction.єB;
+			} else if (aORb.equals(eA)) {
+				return Direction.eB;
 			} else {
-				return Direction.єA;
+				return Direction.eA;
 			}
 		}
 
@@ -109,7 +44,7 @@ public class NameJudging {
 	}
 
 	public enum Shubetsu {
-		Laview, TJраїна, S_TRAIN, 川越特急, 特急, 快速急行, ゑふраїна, TY特急, 急行, 快速, TY急行, 準急, 区間準急, 各駅停車, OlympicLine, Olympic特急
+		Laview, TJраїна, S_TRAIN, 川越特急, 特急, 快速急行, ゑふраїна, 通勤特急, TY特急, 急行, 快速, TY急行, 準急, 区間準急, 各駅停車, OlympicLine, Olympic特急, 普通
 	}
 
 	public enum FPAIPAColumnname {
@@ -134,6 +69,9 @@ public class NameJudging {
 			if (contentContains(nameList, false, TJ22, TJ30)) {
 				return CodeHeader.TY + "t";
 			}
+			if (contentContains(nameList, false, TJ22, SO10)) {
+				return CodeHeader.TY + "o";
+			}
 			return CodeHeader.TY + "f";
 		}
 
@@ -148,9 +86,17 @@ public class NameJudging {
 			return CodeHeader.SO + "z";
 		}
 
-		if (contentContains(nameList, false, N19, N17, SO18)) {
+		if (contentContains(nameList, false, SYH)) {
+			if (contentNotContains(nameList, false, SO08)) {
+				return CodeHeader.MG + "h";
+			}
+			if (contentNotContains(nameList, false, SO10)) {
+				return CodeHeader.MG + "y";
+			}
+			return CodeHeader.MG + "o";
+		} else if (contentContains(nameList, false, N19, N17)) {
 			return CodeHeader.MG + "n";
-		} else if (contentContains(nameList, false, I27, I25, SO37)) {
+		} else if (contentContains(nameList, false, I27, I25)) {
 			return CodeHeader.MG + "i";
 		}
 		if (contentContains(nameList, true, Y21)) {
@@ -166,6 +112,10 @@ public class NameJudging {
 			if (contentContains(nameList, false, SI26, SI36) && contentNotContains(nameList, true, SI10)) {
 				return CodeHeader.SI + "X";
 			}
+			if (contentContains(nameList, false, SI39)) {
+				return CodeHeader.SI + "b";
+			}
+
 			return CodeHeader.SI + "k";
 		}
 		if (contentContains(nameList, false, TJ10, TJ22, TJ30) && contentNotContains(nameList, true, YF06)) {
@@ -183,9 +133,9 @@ public class NameJudging {
 		} else if (isLocal) {
 			return "lB";
 		} else if (directionA) {
-			return "єA";
+			return "eA";
 		} else {
-			return "єB";
+			return "eB";
 		}
 
 	}
@@ -196,6 +146,10 @@ public class NameJudging {
 				return false;
 			}
 			return true;
+		}
+
+		if (contentNotContains(nameList, true, TY02)) {
+			return false;
 		}
 
 		if (contentContains(nameList, false, SI07, SI39)) {
@@ -215,76 +169,97 @@ public class NameJudging {
 		return false;
 	}
 
-	private static boolean checkDirection(List<String> nameList) {
-		String firstObjectName = nameList.get(0);
-		String lastObjectName = nameList.get(nameList.size() - 1);
+	public static boolean checkDirection(List<String> nameList) {
 
-		String[] dirALastStops = { MM06, Y24, SO18, SO37 };
-		if (Arrays.asList(dirALastStops).stream().anyMatch(sta -> sta.equals(lastObjectName))) {
-			return true;
-		} else if (Arrays.asList(dirALastStops).stream().anyMatch(sta -> sta.equals(firstObjectName))) {
-			return false;
-		}
+		if (!nameList.isEmpty()) {
+			String firstObjectName = nameList.get(0);
+			String lastObjectName = nameList.get(nameList.size() - 1);
 
-		if (firstObjectName.equals(BKLO)) {
-			if (contentContains(nameList, false, Y21, TY01, Tokyo2020_Olympic_Gateway)) {
+			String[] dirALastStops = { MM06, Y24, SO18, SO37 };
+			if (Arrays.asList(dirALastStops).stream().anyMatch(sta -> sta.equals(lastObjectName))) {
 				return true;
-			} else {
+			} else if (Arrays.asList(dirALastStops).stream().anyMatch(sta -> sta.equals(firstObjectName))) {
 				return false;
 			}
-		} else if (lastObjectName.equals(BKLO)) {
-			if (contentContains(nameList, false, Y21, TY01, Tokyo2020_Olympic_Gateway)) {
+			String[] dirBLastStops = { SR29, SR26, I27, SI36, TJ39, SI39, SI41 };
+			if (Arrays.asList(dirBLastStops).stream().anyMatch(sta -> sta.equals(lastObjectName))) {
 				return false;
-			} else {
+			} else if (Arrays.asList(dirBLastStops).stream().anyMatch(sta -> sta.equals(firstObjectName))) {
 				return true;
 			}
-		}
 
-		if (firstObjectName.equals(F13)) {
-			return true;
-		} else if (lastObjectName.equals(F13)) {
-			return false;
-		}
+			if (contentContains(nameList, true, TY01, TY03)) {
+				return judgeDirection(nameList, TY01, TY03);
+			}
 
-		if (lastObjectName.equals(TY16)) {
-			return true;
-		} else if (firstObjectName.equals(TY16)) {
-			return false;
-		}
-		if (contentContains(nameList, true, SO10)) {
-			if (firstObjectName.equals(SO01)) {
-				return true;
-			} else if (lastObjectName.equals(SO01)) {
-				return false;
+			if (contentContains(nameList, true, TY01, BKLO)) {
+				return judgeDirection(nameList, BKLO, TY01);
+			}
+
+			if (contentContains(nameList, true, MG01, MG03)) {
+				return judgeDirection(nameList, MG01, MG03);
+			}
+
+			if (contentContains(nameList, true, SH01, SH03)) {
+				return judgeDirection(nameList, SH03, SH01);
+			}
+
+			if (contentContains(nameList, true, SO01, SO08)) {
+				return judgeDirection(nameList, SO01, SO08);
+			}
+
+			if (contentContains(nameList, true, SO08, SO10)) {
+				return judgeDirection(nameList, SO08, SO10);
+			}
+
+			if (contentContains(nameList, true, YF06, BKLO)) {
+				return judgeDirection(nameList, YF06, BKLO);
+			}
+
+			if (contentContains(nameList, true, BKLO, Y18)) {
+				return judgeDirection(nameList, BKLO, Y18);
+			}
+
+			if (contentContains(nameList, true, N07, N08)) {
+				return judgeDirection(nameList, N08, N07);
+			}
+
+			if (contentContains(nameList, true, I04, I09)) {
+				return judgeDirection(nameList, I09, I04);
+			}
+
+			if (contentContains(nameList, true, BKLO, TJ13)) {
+				return judgeDirection(nameList, TJ13, BKLO);
+			}
+
+			if (contentContains(nameList, true, BKLO, TJ10)) {
+				return judgeDirection(nameList, TJ10, BKLO);
+			}
+
+			if (contentContains(nameList, true, BKLO, SI10)) {
+				return judgeDirection(nameList, SI10, BKLO);
+			}
+
+			if (contentContains(nameList, true, BKLO, SI17)) {
+				return judgeDirection(nameList, SI17, BKLO);
+			}
+
+			if (contentContains(nameList, true, SJK, Tokyo2020_Olympic_Gateway)) {
+				return judgeDirection(nameList, SJK, Tokyo2020_Olympic_Gateway);
 			}
 		}
-
-		if (lastObjectName.equals(MG13)) {
-			return true;
-		} else if (firstObjectName.equals(MG13)) {
-			return false;
-		}
-
-		if (lastObjectName.equals(COTH)) {
-			return true;
-		} else if (firstObjectName.equals(COTH)) {
-			return false;
-		}
-
-		if (lastObjectName.equals(NI03)) {
-			return true;
-		} else if (firstObjectName.equals(NI03)) {
-			return false;
-		}
-		if (contentContains(nameList, true, Tokyo2020_Olympic_Gateway)) {
-			if (firstObjectName.equals(SJK)) {
-				return true;
-			} else if (lastObjectName.equals(SJK)) {
-				return false;
-			}
-		}
-
 		return false;
+	}
+
+	//名前で方向を決定
+	private static Boolean judgeDirection(List<String> nameList, String dirBside, String dirAside) {
+		if (nameList.contains(dirBside) && nameList.contains(dirAside)) {
+			if (nameList.indexOf(dirBside) < nameList.indexOf(dirAside)) {
+				return true;
+			}
+			return false;
+		}
+		return null;
 	}
 
 	private static boolean contentContains(List<String> nameList, boolean allMatch, String... judgeValues) {
@@ -307,18 +282,29 @@ public class NameJudging {
 			List<CodeHeader> headersTY = new ArrayList<>();
 			headersTY.add(CodeHeader.TY);
 
+			if (deployCode.startsWith(CodeHeader.TY.toString() + "t")) {
+				headersTY.add(CodeHeader.TJ);
+			}
+
 			if (deployCode.startsWith(CodeHeader.TY.toString() + "s")) {
 				headersTY.add(CodeHeader.SI);
 			}
 
-			if (deployCode.startsWith(CodeHeader.TY.toString() + "t")) {
-				headersTY.add(CodeHeader.TJ);
+			if (deployCode.startsWith(CodeHeader.TY.toString() + "o")) {
+				headersTY.add(CodeHeader.MG);
+				headersTY.add(CodeHeader.SO);
 			}
+
 			return headersTY;
 		}
 
 		if (deployCode.startsWith(CodeHeader.MG.toString())) {
-			return Arrays.asList(CodeHeader.MG);
+			List<CodeHeader> headersMG = new ArrayList<>();
+			headersMG.add(CodeHeader.MG);
+			if (deployCode.startsWith(CodeHeader.MG.toString() + "o")) {
+				headersMG.add(CodeHeader.SO);
+			}
+			return headersMG;
 		}
 		if (deployCode.startsWith(CodeHeader.YF.toString())) {
 			List<CodeHeader> headersYF = new ArrayList<>();
@@ -377,7 +363,7 @@ public class NameJudging {
 		if (codeHeader.equals(CodeHeader.TY) && deployCode.startsWith(CodeHeader.YF.toString()) && name.equals(YF08)) {
 			return false;
 		}
-		if (codeHeader.equals(CodeHeader.MG) && deployCode.startsWith(CodeHeader.五輪.toString()) && name.equals(COTH)) {
+		if (codeHeader.equals(CodeHeader.MG) && deployCode.startsWith(CodeHeader.五輪.toString()) && name.equals(COTHGI)) {
 			return false;
 		}
 		return nameList.contains(name);
@@ -397,7 +383,7 @@ public class NameJudging {
 			}
 		}
 
-		if (!deployCode.contains("є")) {
+		if (!deployCode.contains("e")) {
 			return Shubetsu.各駅停車;
 		}
 
@@ -408,10 +394,10 @@ public class NameJudging {
 				}
 				return Shubetsu.ゑふраїна;
 			} else {
-				if (scheduleNames.contains(TY02)) {
+				if (scheduleNames.contains(TY02) || scheduleNames.contains(TY12)) {
 					return Shubetsu.各駅停車;
 				}
-				if (scheduleNames.contains(BKLO) && !scheduleNames.contains(F12)) {
+				if (!scheduleNames.contains(F14)) {
 					return Shubetsu.急行;
 				}
 				return Shubetsu.TY急行;
@@ -434,31 +420,35 @@ public class NameJudging {
 				return Shubetsu.各駅停車;
 			}
 
-			if (scheduleNames.contains(SO09)) {
+			if (contentContains(scheduleNames, true, SO01, SO09)) {
 				return Shubetsu.快速;
 			}
 
-			if (scheduleNames.contains(SO11)) {
-				return Shubetsu.急行;
-			}
-			if (!scheduleNames.contains(SO11) && scheduleNames.contains(SO10)) {
-				return Shubetsu.特急;
+			if (!scheduleNames.contains(SO11) && !scheduleNames.contains(SO31) && scheduleNames.contains(SO10) && (contentContains(scheduleNames, false, SO18, SO37))) {
+				if (contentNotContains(scheduleNames, false, SO09)) {
+					return Shubetsu.特急;
+				}
+				return Shubetsu.通勤特急;
 			}
 			return Shubetsu.各駅停車;
 		}
 
 		if (codeHeader.equals(CodeHeader.TJ)) {
 			if (deployCode.contains(CodeHeader.TY.toString())) {
-				if (scheduleNames.contains(TJ12)) {
+				if (scheduleNames.contains(TJ15)) {
 					return Shubetsu.各駅停車;
-				} else {
+				} else if (!contentContains(scheduleNames, false, TJ14)) {
 					return Shubetsu.ゑふраїна;
+				} else {
+					return Shubetsu.急行;
 				}
 			}
 			if (deployCode.contains(CodeHeader.YF.toString()) && scheduleNames.contains(TJ12)) {
 				return Shubetsu.各駅停車;
 			}
-
+			if (deployCode.contains(CodeHeader.YF.toString()) && scheduleNames.contains(TJ47)) {
+				return Shubetsu.普通;
+			}
 			if (!scheduleNames.contains(TJ12)) {
 				if (scheduleNames.contains(TJ13) && !scheduleNames.contains(TJ14)) {
 					if (scheduleNames.contains(TJ28)) {
@@ -484,9 +474,10 @@ public class NameJudging {
 				return Shubetsu.ゑふраїна;
 			}
 
-			if (scheduleNames.contains(SI07) || scheduleNames.contains(SI39)) {
+			if (contentContains(scheduleNames, false, SI07, SI39)) {
 				return Shubetsu.各駅停車;
 			}
+
 			if (scheduleNames.contains(SI06)) {
 
 				if (scheduleNames.contains(SI12)) {
@@ -523,6 +514,9 @@ public class NameJudging {
 			if (name.equals(I27)) {
 				return Terminus.isTerminusB;
 			}
+			if (name.equals(SR29)) {
+				return Terminus.isTerminusB;
+			}
 			break;
 
 		case YF:
@@ -547,7 +541,7 @@ public class NameJudging {
 			if (name.equals(BKLO)) {
 				return Terminus.isTerminusA;
 			}
-			if (name.equals(TJ33)) {
+			if (name.equals(TJ39)) {
 				return Terminus.isTerminusB;
 			}
 			break;
