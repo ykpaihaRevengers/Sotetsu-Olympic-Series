@@ -79,6 +79,8 @@ public class MainDAO implements AutoCloseable {
 	public static final String DEFAULT = " DEFAULT ";
 
 	public static final String SELECT = "SELECT ";
+	public static final String COUNT_FULL = "COUNT(*) ";
+	public static final String COUNT = "COUNT";
 	public static final String AS = " AS ";
 	public static final String FROM = " FROM ";
 	public static final String WHERE = " WHERE ";
@@ -103,6 +105,9 @@ public class MainDAO implements AutoCloseable {
 	public static final String WITH_UR = ";";
 
 	public static final String CREATE_TEMPORARY_TABLE = "CREATE TEMPORARY TABLE ";
+
+	public static final String NULLS_FIRST = " NULLS FIRST";
+	public static final String NULLS_LAST = " NULLS LAST";
 
 	public enum CurrentDateTimeStamp {
 		CURRENT_TIMESTAMP, CURRENT_DATE, CURRENT_TIME;
@@ -148,16 +153,16 @@ public class MainDAO implements AutoCloseable {
 	public String executeUpdate(String sql, List<Object> preceHolders) {
 
 		try (PreparedStatement st = connection.prepareStatement(sql);) {
-
 			if (sql.contains("?")) {
-				System.out.println("SIZE::" + preceHolders.size());
 				setPraceHolders(st, preceHolders);
 			}
+			System.out.println("[SQL] " + sql);
 			//SQLの実行
-			System.out.println(sql);
 			return Integer.toString(st.executeUpdate());
+
 		} catch (SQLException e) {
-			e.printStackTrace();
+			System.out.println(e.getErrorCode());
+			System.out.println(e.getMessage());
 			return e.getMessage();
 
 		}
@@ -166,10 +171,10 @@ public class MainDAO implements AutoCloseable {
 
 	public ResultSet executeQuery(String sql, List<Object> preceHolders) throws SQLException {
 		PreparedStatement st = connection.prepareStatement(sql);
-		System.out.println(sql);
 		if (sql.contains("?")) {
 			setPraceHolders(st, preceHolders);
 		}
+		System.out.println("[SQL] " + sql);
 		//SQLの実行
 		return st.executeQuery();
 	}
@@ -182,7 +187,6 @@ public class MainDAO implements AutoCloseable {
 			connection.setAutoCommit(false);
 			//SQLの実行
 			for (String sql : sqls) {
-				System.out.println(sql);
 				connection.prepareStatement(sql).executeUpdate();
 				count++;
 			}
@@ -386,7 +390,6 @@ public class MainDAO implements AutoCloseable {
 			int i = 0;
 			for (Column column : insert.getInsertColumns()) {
 				String element = insertValue.get(i++);
-				System.out.println(element);
 				if (ScenarioUtil.checkStringValue(element)) {
 					if (CurrentDateTimeStamp.contains(element)) {
 						parameterSql = parameterSql + element + ", ";
@@ -449,8 +452,6 @@ public class MainDAO implements AutoCloseable {
 				}
 			}
 		}
-		System.out.println("updateSql    " + updateSql);
-		System.out.println("placeHolders    " + placeHolders);
 
 		return getExecuteMessage(executeUpdate(updateSql + WITH_UR, placeHolders));
 	}
@@ -475,30 +476,20 @@ public class MainDAO implements AutoCloseable {
 			deleteSql = deleteSql + ScenarioUtil.mappingJoining(filters, filter -> filter.checkIsNull(), MainDAO.AND);
 			filters.stream().map(f -> f.getValue()).forEach(this.placeHolders::add);
 		}
-		System.out.println("deleteSql ; " + deleteSql);
 		return executeUpdate(deleteSql + WITH_UR, placeHolders);
 	}
 
-	public List<String> showTableList() throws DAOException {
+	public Map<String, Integer> showTableList() throws DAOException {
 		// SQL文の作成
 		String sql = new StringBuffer(SELECT)
 				.append("relname").append(AS).append("table_name").append(FROM).append("pg_stat_user_tables")
 				.append(ORDER_BY).append("relname").append(WITH_UR).toString();
 
-		//SQLの実行
-		try (ResultSet rs = executeQuery(sql, this.placeHolders);) {
-			List<String> list = new ArrayList<String>();
-			while (rs.next()) {
-				list.add(rs.getString("table_name"));
-			}
-			return list;
-		} catch (SQLException e) {
-			e.printStackTrace();
-			throw new DAOException("テーブルのカラム表示に失敗しました");
-		}
+		//テーブル一覧の取得
+		return selectTableList(sql);
 	}
 
-	public List<String> showTableList(String filterValue, Operator operator) throws DAOException {
+	public Map<String, Integer> showTableList(String filterValue, Operator operator) throws DAOException {
 		this.placeHolders.clear();
 		String operatorToString = operator.toString();
 		if (operator.equals(Operator.STARTSWITH)) {
@@ -515,17 +506,29 @@ public class MainDAO implements AutoCloseable {
 				.append("relname").append(AS).append("table_name").append(FROM).append("pg_stat_user_tables")
 				.append(WHERE).append("relname ").append(operatorToString).append(" ?")
 				.append(ORDER_BY).append("relname").append(WITH_UR).toString();
-		System.out.println(sql);
 		this.placeHolders.add(filterValue);
-		System.out.println("filterValue" + filterValue);
+
+		//テーブル一覧の取得
+		return selectTableList(sql);
+	}
+
+	private Map<String, Integer> selectTableList(String sql) throws DAOException {
 		//SQLの実行
 		try (ResultSet rs = executeQuery(sql, this.placeHolders);) {
-			List<String> list = new ArrayList<String>();
+			List<String> tableList = new ArrayList<String>();
 			while (rs.next()) {
-				list.add(rs.getString("table_name"));
+				tableList.add(rs.getString("table_name"));
 			}
-			System.out.println(list);
-			return list;
+			return tableList.stream().collect(Collectors.toMap(tablename -> tablename, tableName -> {
+				try (ResultSet rscount = executeQuery(new StringBuffer(SELECT).append(COUNT_FULL).append(FROM).append(tableName).toString(), this.placeHolders);) {
+					while (rscount.next()) {
+						return rscount.getInt(1);
+					}
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+				return -1;
+			}, (u, v) -> v, LinkedHashMap::new));
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw new DAOException("テーブルのカラム表示に失敗しました");
@@ -591,6 +594,12 @@ public class MainDAO implements AutoCloseable {
 			sql = new StringBuffer(sql).append(ORDER_BY).append(select.getOrderByColumn()).toString();
 			if (select.isDesc()) {//降順の場合
 				sql = sql + DESC;
+				if (!select.isNullsFirst()) {
+					sql = sql + NULLS_LAST;
+
+				}
+			} else if (select.isNullsFirst()) {//NULL 値を最初に表示させる場合
+				sql = sql + NULLS_FIRST;
 			}
 		}
 

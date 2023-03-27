@@ -21,12 +21,10 @@ public class ManuscriptScedule {
 	}
 
 	public void setCode(String code, List<String> nameList) {
-		System.out.println(nameList);
 		String header = NameJudging.judgeHeader(nameList);
 		String footer = NameJudging.judgeFooter(nameList);
 
 		this.code = header + code + footer;
-		System.out.println("this.code" + this.code);
 	}
 
 	public List<ScheduleTag> getScheduleTags() {
@@ -48,7 +46,8 @@ public class ManuscriptScedule {
 			insertValue.add(tag.getDeparture());
 			insertValue.add(CurrentDateTimeStamp.CURRENT_TIMESTAMP.toString());
 			insertValues.add(insertValue);
-
+			System.out.println("this.code : " + this.code);
+			System.out.println("tag.getName() : " + tag.getName());
 		}
 		return insertValues;
 

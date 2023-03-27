@@ -13,20 +13,30 @@
 			<th>コード</th>
 			<th>種別</th>
 			<th>行先</th>
-			<th>削除する</th>
 			<th>デプロイ日時</th>
+			<th></th>
+			<th>詳細表</th>
+			<th></th>
+			<th>削除する</th>
 		</tr>
 		<c:forEach items="${deployed_schedule_list}" var="record">
 			<tr>
 				<td>${record.deployed_code}</td>
 				<td>${record.shubetsu}</td>
 				<td>${record.ikisaki}</td>
+				<td>${record.deployed_timestamp}</td>
+				<td></td>
 				<td>
-					<form action="/base/FittingServlet?action=deleteCode" method="post">
-						<input type="hidden" name="table_name" value="${table}"> <input type="submit" value="削除"><input type="hidden" name="page" value="select.jsp">
+					<form action="/base/FittingServlet?action=selectCode" method="post">
+						<input type="hidden" name="deployed_code" value="${record.deployed_code}"> <input type="submit" value="詳細"><input type="hidden" name="page" value="individual/checkTableList.jsp">
 					</form>
 				</td>
-				<td>${record.deployed_timestamp}</td>
+				<td></td>
+				<td>
+					<form action="/base/FittingServlet?action=deleteCode" method="post">
+						<input type="hidden" name="deployed_code" value="${record.deployed_code}"> <input type="submit" value="削除"><input type="hidden" name="page" value="individual/checkTableList.jsp">
+					</form>
+				</td>
 			</tr>
 		</c:forEach>
 	</table>

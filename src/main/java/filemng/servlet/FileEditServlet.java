@@ -3,8 +3,6 @@ package filemng.servlet;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import javax.servlet.ServletException;
@@ -13,9 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import filemng.bean.FileEdition;
 import filemng.bean.FileList;
-import filemng.bean.TextBook;
+import home.dao.err.DAOException;
 import home.servlet.MainServlet;
 import home.tool.ScenarioUtil;
 
@@ -43,12 +40,11 @@ public class FileEditServlet extends MainServlet {
 		// 初期処理
 		super.doGet(request, response);
 		FileList fileList = (FileList) session.getAttribute("file_list");
-		List<TextBook> bookList = new ArrayList<>();
 
 		if (action != null) {
 			switch (action) {
 			case "file":
-				Path fullPath = Paths.get(Optional.ofNullable(request.getParameter("file_fullpath")).orElse(""));
+				Path fullPath = Paths.get(Optional.ofNullable(getRequestParameter(request, "file_fullpath")).orElse(""));
 				if (!ScenarioUtil.checkObjectValue(fullPath) || fullPath.toString().isBlank()) {
 					fullPath = (Path) session.getAttribute("file_fullpath");
 				}
@@ -67,12 +63,14 @@ public class FileEditServlet extends MainServlet {
 				}
 
 				if (super.getRequestParameter(request, "edition").equals("execute_file")) {
-					List<FileEdition> editions = fileList.getFileEditions();
-					bookList = fileList.getBookList();
-					//登録した編集方法でファイルを編集
-					bookList.stream().forEachOrdered(book -> book.editTextbookByOrdered(request, editions));
-					fileList.setBookList(bookList);
-					request.setAttribute(FILE_EXECUTE_MSG, "登録した編集方法で処理を実行しました。");
+					//登録した編集方法で編集されたファイルを登録
+					try {
+						fileList.editFile(fileList.getFileEditions());
+						request.setAttribute(FILE_EXECUTE_MSG, "登録した編集方法で処理を実行しました。");
+					} catch (DAOException e) {
+						request.setAttribute(FILE_EXECUTE_MSG, e.getMessage());
+						e.printStackTrace();
+					}
 					request.setAttribute("disable", "disable");
 				}
 

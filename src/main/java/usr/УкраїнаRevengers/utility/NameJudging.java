@@ -118,6 +118,10 @@ public class NameJudging implements NumberingNameList {
 
 			return CodeHeader.SI + "k";
 		}
+		if (contentContains(nameList, false, SI05, SI37, SI39)) {
+			return CodeHeader.SI + "r";
+		}
+
 		if (contentContains(nameList, false, TJ10, TJ22, TJ30) && contentNotContains(nameList, true, YF06)) {
 			return CodeHeader.TJ + "k";
 		}
@@ -389,7 +393,7 @@ public class NameJudging implements NumberingNameList {
 
 		if (codeHeader.equals(CodeHeader.TY)) {
 			if (!scheduleNames.contains(TY05)) {
-				if (scheduleNames.contains(F12)) {
+				if (scheduleNames.contains(F14)) {
 					return Shubetsu.TY特急;
 				}
 				return Shubetsu.ゑふраїна;
@@ -404,7 +408,7 @@ public class NameJudging implements NumberingNameList {
 			}
 		}
 		if (codeHeader.equals(CodeHeader.MG)) {
-			if (scheduleNames.contains(MG01) && !scheduleNames.contains(MG09)) {
+			if (scheduleNames.contains(MG01) && !scheduleNames.contains(MG07)) {
 				return Shubetsu.急行;
 			} else {
 				return Shubetsu.各駅停車;

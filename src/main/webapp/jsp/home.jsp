@@ -32,8 +32,8 @@
 	<table border="1">
 		<tr>
 			<th>テーブル名</th>
-			<th>リンク</th>
-			<th></th>
+			<th>カラム詳細</th>
+			<th>件数</th>
 			<th>全データ確認</th>
 			<th></th>
 			<th>テーブルの削除</th>
@@ -41,22 +41,22 @@
 		</tr>
 		<c:forEach items="${table_names}" var="table">
 			<tr>
-				<td>${table}</td>
+				<td>${table.key}</td>
 				<td>
 					<form action="/base/DataBaseServlet?action=showColumns" method="post">
-						<input type="hidden" name="table_name" value="${table}"> <input type="submit" value="カラム詳細">
+						<input type="hidden" name="table_name" value="${table.key}"> <input type="submit" value="カラム詳細">
 					</form>
 				</td>
-				<td></td>
+				<td>${table.value}</td>
 				<td>
 					<form action="/base/DataBaseServlet?action=select" method="post">
-						<input type="hidden" name="table_name" value="${table}"> <input type="submit" value="データ一覧">
+						<input type="hidden" name="table_name" value="${table.key}"> <input type="submit" value="データ一覧">
 					</form>
 				</td>
 				<td></td>
 				<td>
 					<form action="/base/DataBaseServlet?action=drop_table" method="post">
-						<input type="hidden" name="table_name" value="${table}"> <input type="submit" style="color: #ffffff; background-color: #ff0000;" value="テーブル本体を削除">
+						<input type="hidden" name="table_name" value="${table.key}"> <input type="submit" style="color: #ffffff; background-color: #ff0000;" value="テーブル本体を削除">
 					</form>
 				</td>
 				<td>

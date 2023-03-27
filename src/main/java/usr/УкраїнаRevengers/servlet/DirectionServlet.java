@@ -99,9 +99,7 @@ public class DirectionServlet extends MainServlet {
 
 			if (actionEquals(action, "updateScedule")) {
 				String startColumn = getRequestParameter(request, "start");
-				System.out.println(startColumn);
 				String endColumn = getRequestParameter(request, "end");
-				System.out.println(endColumn + "End");
 
 				int hour = 0;
 				int minute = 0;
@@ -132,9 +130,7 @@ public class DirectionServlet extends MainServlet {
 				String targetCode = getRequestParameter(request, "target");
 				if (ScenarioUtil.checkStringValue(sourceCode, targetCode)) {
 					String startColumn = getRequestParameter(request, "start");
-					System.out.println(startColumn);
 					String endColumn = getRequestParameter(request, "end");
-					System.out.println(endColumn + "End");
 					List<String> sourceSchedule = FPAIPAColumnname.getScheduleColumnName(dao.showColumns(tableName));
 
 					if (ScenarioUtil.checkStringValue(startColumn, endColumn)) {

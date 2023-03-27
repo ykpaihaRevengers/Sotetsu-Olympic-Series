@@ -20,6 +20,7 @@ public class ExecuteQuery {
 	private String groupByColumn;
 
 	private boolean desc;
+	private boolean isNullsFirst;
 
 	public class Filters {
 		private String filterColumn;
@@ -46,6 +47,10 @@ public class ExecuteQuery {
 		public Object getPlaceholder() {
 			return placeholder;
 		}
+	}
+
+	public enum Sorting {
+		DESC, NULLS_FIRST, DESC_NULLS_LAST
 	}
 
 	public ExecuteQuery(String tableName, MainDAO dao) throws DAOException {
@@ -94,6 +99,10 @@ public class ExecuteQuery {
 		return desc;
 	}
 
+	public boolean isNullsFirst() {
+		return isNullsFirst;
+	}
+
 	public List<String> getSelectColumnList() {
 		return selectColumnList;
 	}
@@ -131,6 +140,16 @@ public class ExecuteQuery {
 		}
 	}
 
+	public void setOrderByColumn(String orderByColumn, Sorting sorting) {
+		if (ScenarioUtil.checkStringValue(orderByColumn)) {
+			this.orderByColumn = orderByColumn;
+			this.isNullsFirst = sorting.equals(Sorting.NULLS_FIRST);
+			this.desc = sorting.equals(Sorting.DESC);
+			if (this.isNullsFirst && this.desc) {
+			}
+		}
+	}
+
 	private Object checkOpelationFlug(String opelationFlug, Object placeholder) {
 		if (opelationFlug.equals("LIKE")) {
 			//あいまい検索
@@ -142,6 +161,7 @@ public class ExecuteQuery {
 			//後方一致
 			placeholder = "%" + placeholder;
 		}
+		System.out.println("placeholder " + placeholder);
 		return placeholder;
 	}
 
@@ -162,4 +182,5 @@ public class ExecuteQuery {
 			this.groupByColumn = groupByColumn;
 		}
 	}
+
 }

@@ -141,7 +141,7 @@ public class TextBook {
 
 	}
 
-	public List<String> editTextbookByOrdered(HttpServletRequest request, List<FileEdition> fileEditions) {
+	public void editTextbookByOrdered(List<FileEdition> fileEditions) {
 		for (FileEdition edition : fileEditions) {
 			if (edition.getPattern().equals("contains") && edition.getFunction().equals("filter")) {
 				fileText = filterByKeyWord(edition.getFilterValue());
@@ -154,7 +154,6 @@ public class TextBook {
 			}
 		}
 
-		return fileText;
 	}
 
 	private List<String> filterProcess(String pattern, String filterValue, String function, String functionChar) {
