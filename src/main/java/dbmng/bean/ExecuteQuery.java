@@ -161,7 +161,6 @@ public class ExecuteQuery {
 			//後方一致
 			placeholder = "%" + placeholder;
 		}
-		System.out.println("placeholder " + placeholder);
 		return placeholder;
 	}
 

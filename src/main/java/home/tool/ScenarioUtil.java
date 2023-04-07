@@ -93,6 +93,17 @@ public class ScenarioUtil {
 	}
 
 	/**
+	 *  Streamのdistinct機能を使用して、ArrayListをから重複した要素を排除する
+	 * @param <T>
+	 * @param editList
+	 * @param predicate
+	 * @return
+	 */
+	public static <T> List<T> distinctArrayList(List<T> editList) {
+		return editList.stream().distinct().collect(Collectors.toList());
+	}
+
+	/**
 	 * Streamのmap機能を使用して、ArrayListから文字列を作成する
 	 * @param <T>
 	 * @param editList
@@ -104,4 +115,22 @@ public class ScenarioUtil {
 		return editList.stream().map(function).collect(Collectors.joining(delimiter));
 	}
 
+	public static boolean anyMatch(String value, String... judgeValues) {
+		return Arrays.asList(judgeValues).stream().anyMatch(judgeValue -> value.equals(judgeValue));
+	}
+
+	public static boolean noneMatch(String value, String... judgeValues) {
+		return Arrays.asList(judgeValues).stream().noneMatch(judgeValue -> value.equals(judgeValue));
+	}
+
+	public static boolean contentContains(List<String> nameList, boolean allMatch, String... judgeValues) {
+		if (allMatch) {
+			return Arrays.asList(judgeValues).stream().allMatch(judgeValue -> nameList.contains(judgeValue));
+		}
+		return Arrays.asList(judgeValues).stream().anyMatch(judgeValue -> nameList.contains(judgeValue));
+	}
+
+	public static boolean contentNotContains(List<String> nameList, String... judgeValues) {
+		return Arrays.asList(judgeValues).stream().noneMatch(judgeValue -> nameList.contains(judgeValue));
+	}
 }

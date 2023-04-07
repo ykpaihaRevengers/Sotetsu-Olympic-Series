@@ -39,7 +39,6 @@ public class DirectionServlet extends MainServlet {
 	 */
 	public DirectionServlet() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	/**
@@ -211,7 +210,6 @@ public class DirectionServlet extends MainServlet {
 
 				//try-with-resources文を使うことでclose処理を自動化
 				try (PrintWriter pw = response.getWriter()) {
-					System.out.println("Servlet.service pw");
 
 					//文字化け防止のため、BOM付きのファイルとして設定
 					pw.write(0xFEFF);
@@ -236,7 +234,6 @@ public class DirectionServlet extends MainServlet {
 								}
 								outAppending.add(value);
 							}
-							System.out.println("Servlet.service for");
 							pw.print(String.join(",", outAppending) + FileUtils.CRLF);
 						}
 					}
@@ -292,8 +289,6 @@ public class DirectionServlet extends MainServlet {
 				isRange = false;
 			}
 		}
-		System.out.println("columnList" + columnList);
-		System.out.println("filteredColumns" + filteredColumns);
 
 		return filteredColumns;
 	}

@@ -65,8 +65,7 @@ public class TextBook {
 
 		this.fileText = fileTexts;
 		String hashCodeToString = Integer.toString(fileText.hashCode());
-		this.ordinalCode = hashCodeToString.substring(hashCodeToString.length() - 5);
-		System.out.println(ordinalCode);
+		this.ordinalCode = hashCodeToString.substring(hashCodeToString.length() - 6);
 
 	}
 
@@ -77,7 +76,7 @@ public class TextBook {
 		this.fileText = ScenarioUtil.filteringArrayList(fileText, line -> ScenarioUtil.checkStringValue(line) &&
 				!line.startsWith("Copyright (C)") && !line.isBlank());
 		String hashCodeToString = Integer.toString(this.fileText.hashCode());
-		this.ordinalCode = hashCodeToString.substring(hashCodeToString.length() - 5);
+		this.ordinalCode = hashCodeToString.substring(hashCodeToString.length() - 6);
 	}
 
 	public String getFileName() {
@@ -264,26 +263,22 @@ public class TextBook {
 	public ManuscriptScedule arrangeTextBook() {
 
 		boolean firstText = true;
-		ManuscriptScedule manuSchedule = new ManuscriptScedule();
 		List<ScheduleTag> scheduleTags = new ArrayList<>();
 		for (String text : this.getFileText()) {
 			String[] manuscriptArray = text.split(",");
 			if (manuscriptArray.length == 2) {
 				if (firstText) {
-					scheduleTags.add(new ScheduleTag(manuscriptArray[1], null, (manuscriptArray[0])));
+					scheduleTags.add(new ScheduleTag(manuscriptArray[1].trim(), null, manuscriptArray[0].trim()));
 					firstText = false;
 				} else {
-					scheduleTags.add(new ScheduleTag(manuscriptArray[1], (manuscriptArray[0])));
+					scheduleTags.add(new ScheduleTag(manuscriptArray[1].trim(), manuscriptArray[0].trim()));
 				}
 			}
 			if (manuscriptArray.length == 3) {
-				scheduleTags.add(new ScheduleTag(manuscriptArray[2], (manuscriptArray[0]), (manuscriptArray[1])));
+				scheduleTags.add(new ScheduleTag(manuscriptArray[2].trim(), manuscriptArray[0].trim(), manuscriptArray[1].trim()));
 			}
 		}
 
-		manuSchedule.setScheduleTags(scheduleTags);
-		manuSchedule.setCode(this.getOrdinalCode(), ScenarioUtil.mappingArrayList(scheduleTags, scheduleTag -> scheduleTag.getName().trim()));
-
-		return manuSchedule;
+		return new ManuscriptScedule(scheduleTags, this.ordinalCode);
 	}
 }

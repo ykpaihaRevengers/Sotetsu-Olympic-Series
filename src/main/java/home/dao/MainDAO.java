@@ -156,13 +156,11 @@ public class MainDAO implements AutoCloseable {
 			if (sql.contains("?")) {
 				setPraceHolders(st, preceHolders);
 			}
-			System.out.println("[SQL] " + sql);
 			//SQLの実行
 			return Integer.toString(st.executeUpdate());
 
 		} catch (SQLException e) {
-			System.out.println(e.getErrorCode());
-			System.out.println(e.getMessage());
+			e.printStackTrace();
 			return e.getMessage();
 
 		}
@@ -174,7 +172,6 @@ public class MainDAO implements AutoCloseable {
 		if (sql.contains("?")) {
 			setPraceHolders(st, preceHolders);
 		}
-		System.out.println("[SQL] " + sql);
 		//SQLの実行
 		return st.executeQuery();
 	}

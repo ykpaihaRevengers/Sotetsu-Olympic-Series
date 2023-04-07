@@ -39,6 +39,8 @@
 		</c:forEach>
 	</table>
 
-
+	<form action="/base/CreateExcelServlet?action=createExcel" method="post">
+		<input type="submit" value="エクセルを出力"><input type="hidden" name="page" value="individual/checkTableList.jsp">
+	</form>
 </body>
 </html>

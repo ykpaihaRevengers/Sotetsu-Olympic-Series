@@ -9,20 +9,28 @@
 </head>
 <body>
 	<h4>詳細内容</h4>
-	コード：${deployed_code}
-	<p>[${shubetsu}] ${ikisaki} 行</p>
+	コード：${deployedSchedule.code}
+	<p>[${deployedSchedule.orthodoxShubetsu}] ${deployedSchedule.ikisaki} 行</p>
 
 	<table border="1">
 		<tr>
 			<th></th>
-			<th>発</th>
 			<th>着</th>
+			<th>発</th>
+			<th>所要時間</th>
+			<th>待機時間</th>
+			<th>トータル</th>
+
 		</tr>
-		<c:forEach items="${selectedData}" var="record">
+		<c:forEach items="${deployedSchedule.scheduleTags}" var="record">
 			<tr>
 				<td>${record.name}</td>
-				<td>${record.arr}</td>
-				<td>${record.dep}</td>
+				<td>${record.arrive}</td>
+				<td>${record.departure}</td>
+				<td>${record.spending}</td>
+				<td>${record.waitMoment}</td>
+				<td>${record.totalMinute}</td>
+
 			</tr>
 		</c:forEach>
 

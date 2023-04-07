@@ -46,7 +46,6 @@ public class AlterTable extends ExecuteUpdate {
 	}
 
 	public void setAddColumnList(List<String> addColumnList) {
-		System.out.println(addColumnList.size());
 		this.addColumnList = addColumnList;
 	}
 

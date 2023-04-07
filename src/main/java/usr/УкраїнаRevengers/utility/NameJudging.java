@@ -8,11 +8,10 @@ import java.util.stream.Collectors;
 import dbmng.bean.Column;
 import home.tool.ScenarioUtil;
 
-public class NameJudging implements NumberingNameList {
+public class NameJudging implements NumberingNameList, DirectionsList {
 
 	public enum CodeHeader {
 		TY, MG, SO, YF, SI, TJ, 五輪
-
 	}
 
 	public enum Athletes {
@@ -20,17 +19,13 @@ public class NameJudging implements NumberingNameList {
 	}
 
 	public enum Direction {
-		lA, lB, eA, eB;
+		A, B;
 
 		public Direction exchangeAB(Direction aORb) {
-			if (aORb.equals(lA)) {
-				return Direction.lB;
-			} else if (aORb.equals(lB)) {
-				return Direction.lA;
-			} else if (aORb.equals(eA)) {
-				return Direction.eB;
+			if (aORb.equals(A)) {
+				return Direction.B;
 			} else {
-				return Direction.eA;
+				return Direction.A;
 			}
 		}
 
@@ -44,7 +39,7 @@ public class NameJudging implements NumberingNameList {
 	}
 
 	public enum Shubetsu {
-		Laview, TJраїна, S_TRAIN, 川越特急, 特急, 快速急行, ゑふраїна, 通勤特急, TY特急, 急行, 快速, TY急行, 準急, 区間準急, 各駅停車, OlympicLine, Olympic特急, 普通
+		Laview, TJраїна, S_TRAIN, 川越特急, 特急, 快速急行, ゑふраїна, 準特急, 通勤特急, TY特急, オリンピックライン特急, 急行, 通勤急行, 相特急行, 快速, TY急行, 準急, 区間準急, 各駅停車, 普通, オリンピックライン
 	}
 
 	public enum FPAIPAColumnname {
@@ -66,10 +61,10 @@ public class NameJudging implements NumberingNameList {
 			if (contentContains(nameList, false, SI10)) {
 				return CodeHeader.TY + "s";
 			}
-			if (contentContains(nameList, false, TJ22, TJ30)) {
+			if (contentContains(nameList, false, TJ13, TJ30) && contentNotContains(nameList, SO08)) {
 				return CodeHeader.TY + "t";
 			}
-			if (contentContains(nameList, false, TJ22, SO10)) {
+			if (contentContains(nameList, false, SH01, SO10)) {
 				return CodeHeader.TY + "o";
 			}
 			return CodeHeader.TY + "f";
@@ -87,10 +82,10 @@ public class NameJudging implements NumberingNameList {
 		}
 
 		if (contentContains(nameList, false, SYH)) {
-			if (contentNotContains(nameList, false, SO08)) {
+			if (contentNotContains(nameList, SO08)) {
 				return CodeHeader.MG + "h";
 			}
-			if (contentNotContains(nameList, false, SO10)) {
+			if (contentNotContains(nameList, SO10)) {
 				return CodeHeader.MG + "y";
 			}
 			return CodeHeader.MG + "o";
@@ -108,12 +103,15 @@ public class NameJudging implements NumberingNameList {
 			}
 			return CodeHeader.YF + "y";
 		}
-		if (contentContains(nameList, false, SI10, SI39, SI17) && contentNotContains(nameList, true, YF06)) {
-			if (contentContains(nameList, false, SI26, SI36) && contentNotContains(nameList, true, SI10)) {
+		if (contentContains(nameList, false, SI10, SI39, SI17) && contentNotContains(nameList, YF06)) {
+			if (contentContains(nameList, false, SI26, SI36) && contentNotContains(nameList, SI10)) {
 				return CodeHeader.SI + "X";
 			}
 			if (contentContains(nameList, false, SI39)) {
 				return CodeHeader.SI + "b";
+			}
+			if (contentContains(nameList, true, SI26, SI27, SI28)) {
+				return CodeHeader.SI + "d";
 			}
 
 			return CodeHeader.SI + "k";
@@ -122,55 +120,23 @@ public class NameJudging implements NumberingNameList {
 			return CodeHeader.SI + "r";
 		}
 
-		if (contentContains(nameList, false, TJ10, TJ22, TJ30) && contentNotContains(nameList, true, YF06)) {
+		if (contentContains(nameList, false, TJ10, TJ22, TJ26, TJ30, TJ33) && contentNotContains(nameList, YF06)) {
+			if (contentContains(nameList, false, TJ39, TJ47)) {
+				return CodeHeader.TJ + "d";
+			}
 			return CodeHeader.TJ + "k";
 		}
-		return null;
+		throw new NullPointerException("該当なし");
 	}
 
 	public static String judgeFooter(List<String> nameList) {
-		boolean isLocal = checkIsLocal(nameList);
-		boolean directionA = checkDirection(nameList);
 
-		if (isLocal && directionA) {
-			return "lA";
-		} else if (isLocal) {
-			return "lB";
-		} else if (directionA) {
-			return "eA";
+		if (checkDirection(nameList)) {
+			return "A";
 		} else {
-			return "eB";
+			return "B";
 		}
 
-	}
-
-	private static boolean checkIsLocal(List<String> nameList) {
-		if (contentContains(nameList, true, TY01, TY02, TY07) || contentContains(nameList, true, Y21, Y24)) {
-			if (contentContains(nameList, true, SI10) && contentNotContains(nameList, true, SI07)) {
-				return false;
-			}
-			return true;
-		}
-
-		if (contentNotContains(nameList, true, TY02)) {
-			return false;
-		}
-
-		if (contentContains(nameList, false, SI07, SI39)) {
-			return true;
-		}
-		if (contentContains(nameList, false, TJ04, MG09, SO03)) {
-			return true;
-		}
-
-		if (contentContains(nameList, false, NI03) && contentNotContains(nameList, false, MG01)) {
-			return true;
-		}
-		if (contentContains(nameList, true, SO09, Tokyo2020_Olympic_Gateway)) {
-			return true;
-		}
-
-		return false;
 	}
 
 	public static boolean checkDirection(List<String> nameList) {
@@ -273,14 +239,11 @@ public class NameJudging implements NumberingNameList {
 		return Arrays.asList(judgeValues).stream().anyMatch(judgeValue -> nameList.contains(judgeValue));
 	}
 
-	private static boolean contentNotContains(List<String> nameList, boolean allMatch, String... judgeValues) {
-		if (allMatch) {
-			return Arrays.asList(judgeValues).stream().allMatch(judgeValue -> !nameList.contains(judgeValue));
-		}
-		return Arrays.asList(judgeValues).stream().anyMatch(judgeValue -> !nameList.contains(judgeValue));
+	private static boolean contentNotContains(List<String> nameList, String... judgeValues) {
+		return Arrays.asList(judgeValues).stream().allMatch(judgeValue -> !nameList.contains(judgeValue));
 	}
 
-	public static List<CodeHeader> judgeAttribute(String deployCode) {
+	public static List<CodeHeader> judgeAttribute(String deployCode, List<String> scheduleNames) {
 
 		if (deployCode.startsWith(CodeHeader.TY.toString())) {
 			List<CodeHeader> headersTY = new ArrayList<>();
@@ -297,6 +260,9 @@ public class NameJudging implements NumberingNameList {
 			if (deployCode.startsWith(CodeHeader.TY.toString() + "o")) {
 				headersTY.add(CodeHeader.MG);
 				headersTY.add(CodeHeader.SO);
+				if (contentContains(scheduleNames, false, TJ13, TJ22)) {
+					headersTY.add(CodeHeader.TJ);
+				}
 			}
 
 			return headersTY;
@@ -375,40 +341,46 @@ public class NameJudging implements NumberingNameList {
 	}
 
 	public static Shubetsu judgeShubetsu(CodeHeader codeHeader, String deployCode, List<String> scheduleNames) {
-		if (deployCode.contains(CodeHeader.五輪.toString())) {
-			if (scheduleNames.contains(SO09)) {
-				return Shubetsu.OlympicLine;
-			} else {
-				if (deployCode.endsWith(Direction.lA.toString()) || deployCode.endsWith(Direction.lB.toString())) {
-					return Shubetsu.OlympicLine;
-				} else {
-					return Shubetsu.Olympic特急;
-				}
-			}
-		}
 
-		if (!deployCode.contains("e")) {
-			return Shubetsu.各駅停車;
+		if (deployCode.contains(CodeHeader.五輪.toString())) {
+			if (contentNotContains(scheduleNames, SO09, SO11)) {
+				return Shubetsu.オリンピックライン特急;
+			}
+			return Shubetsu.オリンピックライン;
 		}
 
 		if (codeHeader.equals(CodeHeader.TY)) {
-			if (!scheduleNames.contains(TY05)) {
-				if (scheduleNames.contains(F14)) {
-					return Shubetsu.TY特急;
+			if (contentNotContains(scheduleNames, TY02, TY04, TY06, TY10)) {
+				if (contentNotContains(scheduleNames, TY03, F15)) {
+					return Shubetsu.S_TRAIN;
 				}
-				return Shubetsu.ゑふраїна;
+				if (contentNotContains(scheduleNames, TY05, TY08, TY09)) {
+					if (contentNotContains(scheduleNames, TY13, F14, YF04)) {
+						return Shubetsu.ゑふраїна;
+					} else if (contentContains(scheduleNames, true, F14) && contentNotContains(scheduleNames, TY13)) {
+						return Shubetsu.TY特急;
+					} else {
+						return Shubetsu.通勤特急;
+					}
+				} else {
+					if (contentNotContains(scheduleNames, F14, YF04)) {
+						return Shubetsu.急行;
+					} else if (contentNotContains(scheduleNames, F14)) {
+						return Shubetsu.通勤急行;
+					} else {
+						return Shubetsu.TY急行;
+					}
+				}
 			} else {
-				if (scheduleNames.contains(TY02) || scheduleNames.contains(TY12)) {
-					return Shubetsu.各駅停車;
-				}
-				if (!scheduleNames.contains(F14)) {
-					return Shubetsu.急行;
-				}
-				return Shubetsu.TY急行;
+				return Shubetsu.各駅停車;
 			}
 		}
+
 		if (codeHeader.equals(CodeHeader.MG)) {
 			if (scheduleNames.contains(MG01) && !scheduleNames.contains(MG07)) {
+				if (contentNotContains(scheduleNames, MG09, SH02)) {
+					return Shubetsu.快速急行;
+				}
 				return Shubetsu.急行;
 			} else {
 				return Shubetsu.各駅停車;
@@ -416,93 +388,120 @@ public class NameJudging implements NumberingNameList {
 		}
 
 		if (codeHeader.equals(CodeHeader.YF)) {
+			if (contentNotContains(scheduleNames, Y15)) {
+				return Shubetsu.S_TRAIN;
+			}
 			return Shubetsu.各駅停車;
 		}
 
 		if (codeHeader.equals(CodeHeader.SO)) {
-			if (scheduleNames.contains(SO03)) {
+			if (contentNotContains(scheduleNames, SO01)) {
+				if (contentNotContains(scheduleNames, SO09)) {
+					return Shubetsu.特急;
+				} else if (contentNotContains(scheduleNames, SO11, SO31)) {
+					return Shubetsu.通勤特急;
+				}
+				return Shubetsu.各駅停車;
+			} else {
+				if (contentNotContains(scheduleNames, SO02, SO07, SO11, SO37)) {
+					if (contentNotContains(scheduleNames, SO09)) {
+						return Shubetsu.特急;
+					} else {
+						return Shubetsu.通勤特急;
+					}
+				} else if (contentNotContains(scheduleNames, SO02, SO07)) {
+					if (contentNotContains(scheduleNames, SO05)) {
+						return Shubetsu.通勤急行;
+					} else {
+						return Shubetsu.快速;
+					}
+				}
 				return Shubetsu.各駅停車;
 			}
+		}
 
-			if (contentContains(scheduleNames, true, SO01, SO09)) {
-				return Shubetsu.快速;
+		if (codeHeader.equals(CodeHeader.TJ)) {
+
+			if (deployCode.startsWith(CodeHeader.TY.toString()) && contentNotContains(scheduleNames, TJ12, TJ14, TJ18)) {
+				return Shubetsu.ゑふраїна;
 			}
 
-			if (!scheduleNames.contains(SO11) && !scheduleNames.contains(SO31) && scheduleNames.contains(SO10) && (contentContains(scheduleNames, false, SO18, SO37))) {
-				if (contentNotContains(scheduleNames, false, SO09)) {
-					return Shubetsu.特急;
+			if (contentContains(scheduleNames, true, BKLO, TJ18) && contentNotContains(scheduleNames, TJ13, TJ14)) {
+				return Shubetsu.TJраїна;
+			}
+
+			if (contentContains(scheduleNames, true, BKLO, TJ13) && contentNotContains(scheduleNames, TJ12, TJ14, TJ18)) {
+				if (contentNotContains(scheduleNames, TJ11, TJ23, TJ24, TJ25, TJ27, TJ28)) {
+					return Shubetsu.川越特急;
 				}
-				return Shubetsu.通勤特急;
+				return Shubetsu.快速急行;
+			}
+
+			if (contentContains(scheduleNames, true, TJ12, TJ13, TJ14) && contentNotContains(scheduleNames, TJ02, TJ03)) {
+				if (contentNotContains(scheduleNames, TJ07)) {
+					return Shubetsu.急行;
+				}
+				if (contentContains(scheduleNames, false, BKLO)) {
+					return Shubetsu.準急;
+				}
+			}
+			if (deployCode.startsWith("TJd")) {
+				return Shubetsu.普通;
 			}
 			return Shubetsu.各駅停車;
 		}
 
-		if (codeHeader.equals(CodeHeader.TJ)) {
-			if (deployCode.contains(CodeHeader.TY.toString())) {
-				if (scheduleNames.contains(TJ15)) {
-					return Shubetsu.各駅停車;
-				} else if (!contentContains(scheduleNames, false, TJ14)) {
-					return Shubetsu.ゑふраїна;
-				} else {
-					return Shubetsu.急行;
-				}
-			}
-			if (deployCode.contains(CodeHeader.YF.toString()) && scheduleNames.contains(TJ12)) {
-				return Shubetsu.各駅停車;
-			}
-			if (deployCode.contains(CodeHeader.YF.toString()) && scheduleNames.contains(TJ47)) {
-				return Shubetsu.普通;
-			}
-			if (!scheduleNames.contains(TJ12)) {
-				if (scheduleNames.contains(TJ13) && !scheduleNames.contains(TJ14)) {
-					if (scheduleNames.contains(TJ28)) {
-						return Shubetsu.快速急行;
-					}
-					return Shubetsu.川越特急;
-				}
-				if (!scheduleNames.contains(TJ13) && !scheduleNames.contains(TJ14)) {
-					return Shubetsu.TJраїна;
-				}
-			} else {
-				if (scheduleNames.contains(TJ07)) {
-					return Shubetsu.準急;
-				} else {
-					return Shubetsu.急行;
-				}
-			}
-
-		}
-
 		if (codeHeader.equals(CodeHeader.SI)) {
+
+			if (deployCode.startsWith(CodeHeader.SI + "X")) {
+				return Shubetsu.Laview;
+			}
+
+			if (contentNotContains(scheduleNames, SI06)) {
+				if (contentNotContains(scheduleNames, SI18)) {
+					return Shubetsu.快速急行;
+				}
+				if (contentContains(scheduleNames, true, SI11, SI12)) {
+					return Shubetsu.通勤急行;
+				}
+				return Shubetsu.急行;
+			}
 			if (deployCode.contains(CodeHeader.TY.toString()) && !scheduleNames.contains(SI16)) {
 				return Shubetsu.ゑふраїна;
+			}
+
+			if (contentContains(scheduleNames, true, SI06, SI16) && contentNotContains(scheduleNames, SI02, SI03, SI07, SI08)) {
+				if (scheduleNames.contains(SI12)) {
+					return Shubetsu.準急;
+				} else {
+					return Shubetsu.快速;
+				}
+			}
+			if (contentContains(scheduleNames, true, SI07, SI08) && contentNotContains(scheduleNames, SI02, SI03)) {
+				return Shubetsu.区間準急;
 			}
 
 			if (contentContains(scheduleNames, false, SI07, SI39)) {
 				return Shubetsu.各駅停車;
 			}
 
-			if (scheduleNames.contains(SI06)) {
-
-				if (scheduleNames.contains(SI12)) {
-					return Shubetsu.準急;
-				} else {
-					return Shubetsu.快速;
-				}
-			} else {
-				if (!scheduleNames.contains(BKLO)) {
-					return Shubetsu.S_TRAIN;
-				}
-
-				if (scheduleNames.contains(SI10)) {
-					return Shubetsu.急行;
-				} else {
-					return Shubetsu.Laview;
-				}
+			if (deployCode.startsWith("SId")) {
+				return Shubetsu.普通;
 			}
+
+			if (deployCode.contains(CodeHeader.YF.toString()) && contentContains(scheduleNames, true, SI12) && contentNotContains(scheduleNames, SI11, SI13)) {
+				return Shubetsu.S_TRAIN;
+			}
+
+			if (deployCode.contains(CodeHeader.TY.toString()) && contentContains(scheduleNames, true, SI10) && contentNotContains(scheduleNames, SI13)) {
+				return Shubetsu.S_TRAIN;
+			}
+
+			return Shubetsu.各駅停車;
 
 		}
 		return null;
+
 	}
 
 	public static Terminus judgeEnding(String name, CodeHeader header, Direction aORb) {
@@ -569,6 +568,193 @@ public class NameJudging implements NumberingNameList {
 
 		return Terminus.Ordinary;
 
+	}
+
+	public static String judgeStandardSortName(CodeHeader codeHeader, String tableName) {
+
+		if (tableName.endsWith("a")) {
+			switch (codeHeader) {
+			case TY:
+				return TY01 + _DEP;
+			case MG:
+				return COTHGI + _DEP;
+			case SO:
+				return SO08 + _DEP;
+			case TJ:
+				return TJ11 + _DEP;
+			case SI:
+				return SI17 + _DEP;
+			case YF:
+				return BKLO + _DEP;
+			case 五輪:
+				return SJK + _DEP;
+			}
+		} else if (tableName.endsWith("b")) {
+			switch (codeHeader) {
+			case TY:
+				return MM06 + _DEP;
+			case MG:
+				return COTHGI + _DEP;
+			case SO:
+				return SO10 + _DEP;
+			case TJ:
+				return TJ11 + _DEP;
+			case SI:
+				return SI01 + _DEP;
+			case YF:
+				return BKLO + _DEP;
+			case 五輪:
+				return Tokyo2020_Olympic_Gateway + _DEP;
+			}
+		}
+		return null;
+	}
+
+	public static String judgeValueToNull(CodeHeader codeHeader, String tableName, String ikisaki, String columnKey, String previousKey, String previousValue) {
+
+		if (ScenarioUtil.anyMatch(previousValue, EXCEL_NULL, TERMINUS)) {
+			return EXCEL_NULL;
+		}
+		if ((ikisaki + _DEP).equals(columnKey)) {
+			return TERMINUS;
+		}
+		if (tableName.endsWith("a")) {
+			switch (codeHeader) {
+			case TY:
+				if (ScenarioUtil.anyMatch(ikisaki, SO37, SO18, SO14, SO08) && columnKey.equals(TY14 + _ARR)) {
+					return EXCEL_NULL;
+				}
+				if (ScenarioUtil.anyMatch(ikisaki, Y24, Y22) && columnKey.equals(YF07 + _ARR)) {
+					return EXCEL_NULL;
+				}
+				return PASS;
+
+			case MG:
+				if (columnKey.equals(I27 + _DEP) && !previousValue.equals(EXCEL_NULL)) {
+					return NON_VIA;
+				}
+				if (previousValue.equals(NON_VIA)) {
+					return NON_VIA;
+				}
+				return PASS;
+
+			case SO:
+				if (ScenarioUtil.anyMatch(ikisaki, SO18, SO14, SO17) && columnKey.equals(SO31 + _ARR)) {
+					return NON_VIA;
+				}
+				if (previousValue.equals(NON_VIA) && !columnKey.equals(SO11 + _ARR)) {
+					return NON_VIA;
+				}
+				if (ScenarioUtil.noneMatch(previousValue, NON_VIA, EXCEL_NULL) && columnKey.equals(SO11 + _ARR)) {
+					return EXCEL_NULL;
+				}
+				return PASS;
+
+			case TJ:
+				if (!ikisaki.equals(BKLO) && columnKey.equals(TJ10 + _ARR)) {
+					return EXCEL_NULL;
+				}
+				return PASS;
+
+			case SI:
+				if (!ikisaki.equals(BKLO) && columnKey.equals(SI05 + _ARR)) {
+					return EXCEL_NULL;
+				}
+				if (ikisaki.equals(BKLO) && (columnKey.contains(SI38) || columnKey.contains(SI37))) {
+					return NON_VIA;
+				}
+				if (columnKey.equals(SI41 + _DEP) && !previousValue.equals(EXCEL_NULL)) {
+					return NON_VIA;
+				}
+				if (columnKey.equals(SI40 + _ARR) && previousValue.equals(NON_VIA)) {
+					return NON_VIA;
+				}
+				if (columnKey.equals(SI40 + _DEP) && previousValue.equals(NON_VIA)) {
+					return NON_VIA;
+				}
+				if (columnKey.equals(SI39 + _DEP) && !previousValue.equals(EXCEL_NULL)) {
+					return NON_VIA;
+				}
+				if (ikisaki.equals(BKLO) && ScenarioUtil.anyMatch(columnKey, SI38 + _ARR, SI38 + _DEP, SI37 + _ARR, SI37 + _DEP)) {
+					return NON_VIA;
+				}
+				return PASS;
+
+			case YF:
+				return PASS;
+
+			case 五輪:
+				return PASS;
+			}
+		} else if (tableName.endsWith("b")) {
+			switch (codeHeader) {
+			case TY:
+				if (ScenarioUtil.anyMatch(ikisaki, SI10, SI12, SI15, SI17, SI19, SI41, SI23, SI26, SI36) && columnKey.equals(YF05 + _ARR)) {
+					return EXCEL_NULL;
+				}
+				return PASS;
+			case MG:
+				if (columnKey.equals(SH01 + _ARR) && !previousValue.equals(EXCEL_NULL)) {
+					return EXCEL_NULL;
+				}
+				if (ScenarioUtil.anyMatch(ikisaki, YF01, YF05, YF06, YF09, F13, TY01, TJ14, TJ22, TJ30, TJ33) && columnKey.equals(MG07 + _ARR)) {
+					return EXCEL_NULL;
+				}
+				if (columnKey.equals(I04 + _ARR) && !previousValue.equals(EXCEL_NULL)) {
+					return NON_VIA;
+				}
+				if (previousValue.equals(NON_VIA)) {
+					return NON_VIA;
+				}
+				if (ScenarioUtil.noneMatch(previousValue, NON_VIA, EXCEL_NULL) && columnKey.equals(N04 + _ARR)) {
+					return EXCEL_NULL;
+				}
+
+				return PASS;
+			case SO:
+				if (columnKey.equals(SO37 + _DEP) && !previousValue.equals(EXCEL_NULL)) {
+					return NON_VIA;
+				}
+				if (previousValue.equals(NON_VIA)) {
+					return NON_VIA;
+				}
+				if (!ikisaki.equals(SO01) && columnKey.equals(SO07 + _ARR)) {
+					return EXCEL_NULL;
+				}
+				return PASS;
+
+			case TJ:
+				return PASS;
+
+			case SI:
+				if (columnKey.equals(SI37 + _ARR) && !previousValue.equals(EXCEL_NULL)) {
+					return NON_VIA;
+				}
+				if (columnKey.equals(SI39 + _ARR) && !previousValue.equals(EXCEL_NULL)) {
+					return NON_VIA;
+				}
+				if (columnKey.equals(SI40 + _ARR) && !previousValue.equals(EXCEL_NULL)) {
+					return NON_VIA;
+				}
+				if (columnKey.equals(SI07 + _ARR) && !previousValue.equals(NON_VIA)) {
+					return EXCEL_NULL;
+				}
+				if (columnKey.equals(SI19 + _ARR) && !previousValue.equals(NON_VIA)) {
+					return EXCEL_NULL;
+				}
+				if (ScenarioUtil.noneMatch(columnKey, SI06 + _ARR, SI07 + _ARR, SI19 + _ARR) && previousValue.equals(NON_VIA)) {
+					return NON_VIA;
+				}
+				return PASS;
+
+			case YF:
+				return PASS;
+
+			case 五輪:
+				return PASS;
+			}
+		}
+		throw new NullPointerException("該当なし");
 	}
 
 }

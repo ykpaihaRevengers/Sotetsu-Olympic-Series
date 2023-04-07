@@ -265,4 +265,9 @@ public interface NumberingNameList {
 	static final String I26 = "新高島平";
 	static final String I27 = "西高島平";
 
+	static final String OMY = "大宮（埼玉県）";
+	static final String MSS_UR = "武蔵浦和";
+	static final String GOE = "川越";
+	static final String BANE = "赤羽";
+
 }

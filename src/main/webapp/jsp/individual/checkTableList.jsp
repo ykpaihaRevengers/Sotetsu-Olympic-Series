@@ -18,14 +18,19 @@
 		<input type="submit" style="color: #ffffff; background-color: #5F4894;" value="テーブルのリニューアル"> <input type="hidden" name="page" value="individual/checkTableList.jsp">
 	</form>
 	<form action="/base/DataBaseServlet?action=truncate_table" method="post">
-		<input type="submit" style="color: #ffffff; background-color: #8a1a04;" value="テーブルのリセット"> <input type="hidden" name="table_name" value="schedule_manuscript">
+		<input type="submit" style="color: #ffffff; background-color: #8a1a04;" value="テーブルのリセット"> <input type="hidden" name="table_name" value="schedule_manuscript_inserted">
 	</form>
+	<br />
+
 	<c:if test="${!empty execute_message}">
 		<p>${execute_message}</p>
 	</c:if>
 	<form action="/base/FittingServlet?action=deploy" method="post">
 		<input type="submit" style="color: #ffffff; background-color: #44f702;" value="マトリクスにデプロイ"> <input type="hidden" name="table_name" value="schedule_manuscript"> <input type="hidden"
 			name="page" value="select.jsp">
+	</form>
+	<form action="/base/DataBaseServlet?action=truncate_table" method="post">
+		<input type="submit" style="color: #ffffff; background-color: #4a4240;" value="デプロイの中止"> <input type="hidden" name="table_name" value="schedule_manuscript">
 	</form>
 	<br />
 
@@ -38,6 +43,10 @@
 	<br />
 	<c:if test="${!empty table_names}">
 		<jsp:include page="/jsp/individual/efuPAIHA_TABLEs.jsp"></jsp:include>
+	</c:if>
+
+	<c:if test="${! empty genpon_schedule}">
+		<jsp:include page="/jsp/individual/compare.jsp"></jsp:include>
 	</c:if>
 	<br />
 </body>

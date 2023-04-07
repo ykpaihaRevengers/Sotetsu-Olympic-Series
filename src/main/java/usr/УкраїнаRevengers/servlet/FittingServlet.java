@@ -30,11 +30,14 @@ import home.servlet.MainServlet;
 import home.tool.ScenarioUtil;
 import usr.УкраїнаRevengers.bean.ManuscriptScedule;
 import usr.УкраїнаRevengers.bean.ManuscriptScedule.DirectionBaseColumns;
+import usr.УкраїнаRevengers.bean.SceduleComparing;
 import usr.УкраїнаRevengers.utility.NameJudging;
 import usr.УкраїнаRevengers.utility.NameJudging.CodeHeader;
 import usr.УкраїнаRevengers.utility.NameJudging.Direction;
 import usr.УкраїнаRevengers.utility.NameJudging.FPAIPAColumnname;
+import usr.УкраїнаRevengers.utility.NameJudging.Shubetsu;
 import usr.УкраїнаRevengers.utility.NameJudging.Terminus;
+import usr.УкраїнаRevengers.utility.NumberingNameList;
 
 /**
  * Servlet implementation class FittingServlet
@@ -73,7 +76,7 @@ public class FittingServlet extends MainServlet {
 		try (MainDAO dao = new MainDAO((String) session.getAttribute(DataBaseServlet.DATABASE_NAME))) {
 
 			if (actionEquals(action, "manuscriptInsert")) {
-				tableName = "schedule_manuscript";
+				tableName = TABLE_NAME_SCHEDULE_MANUSCRIPT;
 				FileList fileList = (FileList) session.getAttribute("file_list");
 				List<ManuscriptScedule> schedules = ScenarioUtil.mappingArrayList(fileList.getBookList(), book -> book.arrangeTextBook());
 
@@ -95,21 +98,33 @@ public class FittingServlet extends MainServlet {
 
 			if (actionEquals(action, "createTableNameList")) {
 
-				dao.truncateTable(TABLE_NAME_SCHEDULE_MANUSCRIPT);
-
 				FileList modelFileList = new FileList(MODEL_DIR);
 				//登録した編集方法でファイルを編集
 				modelFileList.editFile(dao);
 
-				Insert insert = new Insert(TABLE_NAME_SCHEDULE_MANUSCRIPT, dao);
-				ScenarioUtil.mappingArrayList(modelFileList.getBookList(), book -> book.arrangeTextBook())
-						.stream().map(schedule -> schedule.createInsertValues()).flatMap(list -> list.stream()).forEachOrdered(insert::setInsertValue);
-				dao.insert(insert);
+				//schedule_manuscriptの初期化
+				dao.truncateTable(TABLE_NAME_SCHEDULE_MANUSCRIPT);
 
+				//一元管理テーブルの初期化
+				dao.truncateTable(TABLE_NAME_DEPLOYED_SCHEDULES);
+
+				//テーブルの初期化
 				for (CodeHeader header : CodeHeader.values()) {
 
 					String nameListTableName = NAMELIST + ＿ + header.toString();
 
+					List<ManuscriptScedule> manuscriptSchedulesbyCode = ScenarioUtil.filteringArrayList(ScenarioUtil.mappingArrayList(modelFileList.getBookList(), book -> book.arrangeTextBook()),
+							manuscriptSchedule -> manuscriptSchedule.getCode().startsWith(header.toString()));
+
+					List<String> nameListofSchedule = new ArrayList<>();
+					for (List<String> nameArray : ScenarioUtil.mappingArrayList(manuscriptSchedulesbyCode,
+							schedule -> ScenarioUtil.mappingArrayList(schedule.getScheduleTags(), scheduleTag -> scheduleTag.getName()))) {
+						nameArray.stream().map(name -> name.trim()).forEachOrdered(nameListofSchedule::add);
+					}
+					nameListofSchedule = ScenarioUtil.distinctArrayList(nameListofSchedule);
+					System.out.println(nameListofSchedule);
+
+					/*namelistシリーズ*/
 					//テーブルの削除
 					dao.dropTable(nameListTableName);
 
@@ -119,30 +134,18 @@ public class FittingServlet extends MainServlet {
 					nameListtable.setColumnAttr("name", ColumnTypes.VARCHAR, 40, true, "");
 					String msgNameListtable = dao.createTable(nameListtable);
 
-					ExecuteQuery select = new ExecuteQuery(TABLE_NAME_SCHEDULE_MANUSCRIPT, dao, Arrays.asList("name"));
-					select.setFilter("code", Operator.STARTSWITH, header.toString());
-					select.setOrderByColumn("num");
 					//値の挿入
-					List<String> nameList = new ArrayList<String>(
-							new LinkedHashSet<>(ScenarioUtil.mappingArrayList(dao.select(select), record -> (String) record.get("name"))));
 					Insert inserttoNameList = new Insert(nameListTableName, dao);
-					nameList.stream().forEachOrdered(name -> inserttoNameList.setInsertValue(Arrays.asList(name)));
+					nameListofSchedule.stream().forEachOrdered(name -> inserttoNameList.setInsertValue(Arrays.asList(name)));
 					String messageInsertNameList = dao.insert(inserttoNameList);
-					request.setAttribute("execute_message", msgNameListtable + " " + messageInsertNameList);
-				}
 
-				//schedule_manuscriptの初期化
-				dao.truncateTable(TABLE_NAME_SCHEDULE_MANUSCRIPT);
+					/*direction関係*/
 
-				//一元管理テーブルの初期化
-				dao.truncateTable(TABLE_NAME_DEPLOYED_SCHEDULES);
-
-				for (CodeHeader header : CodeHeader.values()) {
 					List<String> nameList = new ArrayList<String>(
 							new LinkedHashSet<>(ScenarioUtil.mappingArrayList(dao.select(new ExecuteQuery(NAMELIST + ＿ + header.toString(), dao)), record -> (String) record.get("name"))));
-					Direction aORb = Direction.lA;
+					Direction aORb = Direction.A;
 					if (!NameJudging.checkDirection(nameList)) {
-						aORb = Direction.lB;
+						aORb = Direction.B;
 					}
 
 					String outputTableName = HEADER + ＿ + header.toString() + ＿ + DIRECTION;
@@ -163,19 +166,20 @@ public class FittingServlet extends MainServlet {
 					CreateTable tableReverse = new CreateTable(outputTableName + aORb.getDirKey(aORb), "code");
 					String msgBack = dao.createTable(inputArriveAndDeparture(nameList, tableReverse, header, aORb));
 
-					request.setAttribute("execute_message", msg + " " + msgBack);
-
-					//既存データのデプロイ
-					ExecuteQuery select = new ExecuteQuery(TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
-					select.setFilter("code", Operator.STARTSWITH, header.toString());
-					System.out.println(dao.select(select));
-					List<String> deployCodes = ScenarioUtil.mappingArrayList(dao.select(select), map -> (String) map.get("code")).stream().distinct().collect(Collectors.toList());
-					String message = deploy(deployCodes, TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
-					request.setAttribute("execute_message", message);
+					request.setAttribute("execute_message", msgNameListtable + " " + messageInsertNameList + " " + msg + " " + msgBack);
 				}
 
 				//schedule_manuscriptの初期化
 				dao.truncateTable(TABLE_NAME_SCHEDULE_MANUSCRIPT);
+
+				for (CodeHeader header : CodeHeader.values()) {
+					//既存データのデプロイ
+					ExecuteQuery select = new ExecuteQuery(TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
+					select.setFilter("code", Operator.STARTSWITH, header.toString());
+					List<String> deployCodes = ScenarioUtil.mappingArrayList(dao.select(select), map -> (String) map.get("code")).stream().distinct().collect(Collectors.toList());
+					String message = deploy(deployCodes, TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
+					request.setAttribute("execute_message", message);
+				}
 
 			}
 
@@ -188,15 +192,23 @@ public class FittingServlet extends MainServlet {
 
 				//schedule_manuscript_inserted への代入
 				List<Map<String, Object>> schedules = dao.select(select);
-				Insert insert = new Insert("schedule_manuscript_inserted", dao);
+				Insert insert = new Insert(TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
+				int num = 1;
+				String compareCode = "";
 				for (Map<String, Object> schedule : schedules) {
+					String code = (String) schedule.get("code");
 					List<String> insertValue = new ArrayList<>();
-					insertValue.add((String) schedule.get("code"));
+					if (!compareCode.equals(code)) {
+						num = 1;
+					}
+					insertValue.add(Integer.toString(num++));
+					insertValue.add(code);
 					insertValue.add((String) schedule.get("name"));
 					insertValue.add((String) schedule.get("arr"));
 					insertValue.add((String) schedule.get("dep"));
 					insertValue.add(CurrentDateTimeStamp.CURRENT_TIMESTAMP.toString());
 					insert.setInsertValue(insertValue);
+					compareCode = code;
 				}
 				String insertMsg = dao.insert(insert);
 				try {
@@ -211,18 +223,20 @@ public class FittingServlet extends MainServlet {
 				dao.truncateTable(TABLE_NAME_SCHEDULE_MANUSCRIPT);
 
 			}
+
 			if (actionEquals(action, "selectCode")) {
 				String deployCode = getRequestParameter(request, "deployed_code");
-				System.out.println(deployCode);
+				ExecuteQuery ikisakiCode = new ExecuteQuery(TABLE_NAME_DEPLOYED_SCHEDULES, dao);
+				ikisakiCode.setFilter("deployed_code", Operator.EQUALS, deployCode);
+				Map<String, Object> selectedIkisaki = dao.select(ikisakiCode).get(0);
 				ExecuteQuery selectCode = new ExecuteQuery(TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
 				selectCode.setFilter("code", Operator.EQUALS, deployCode);
 				selectCode.setOrderByColumn("dep");
 				List<Map<String, Object>> selectedData = dao.select(selectCode);
-				request.setAttribute("selectedData", selectedData);
 
-				ExecuteQuery ikisakiCode = new ExecuteQuery(TABLE_NAME_DEPLOYED_SCHEDULES, dao);
-				ikisakiCode.setFilter("deployed_code", Operator.EQUALS, deployCode);
-				Map<String, Object> selectedIkisaki = dao.select(ikisakiCode).get(0);
+				ManuscriptScedule deployedSchedule = new ManuscriptScedule(selectedIkisaki, selectedData);
+				request.setAttribute("deployedSchedule", deployedSchedule);
+				request.setAttribute("selectedData", selectedData);
 				request.setAttribute("deployed_code", deployCode);
 				request.setAttribute("shubetsu", selectedIkisaki.get("shubetsu"));
 				request.setAttribute("ikisaki", selectedIkisaki.get("ikisaki"));
@@ -250,6 +264,28 @@ public class FittingServlet extends MainServlet {
 				request.setAttribute("execute_message", "コード番号：" + deployedCode + "を削除しました。");
 			}
 
+			if (actionEquals(action, "compare")) {
+				String origindeployedCode = getRequestParameter(request, "origin_code");
+				String editdeployedCode = getRequestParameter(request, "edit_code");
+				System.out.println(origindeployedCode + " " + editdeployedCode);
+				ExecuteQuery selectoriginmanuscript = new ExecuteQuery(TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
+				selectoriginmanuscript.setFilter("code", Operator.EQUALS, origindeployedCode);
+				ExecuteQuery selectoriginschedules = new ExecuteQuery(TABLE_NAME_DEPLOYED_SCHEDULES, dao);
+				selectoriginschedules.setFilter("deployed_code", Operator.EQUALS, origindeployedCode);
+				ManuscriptScedule originSchedule = new ManuscriptScedule(dao.select(selectoriginschedules).get(0), dao.select(selectoriginmanuscript));
+
+				ExecuteQuery selecteditmanuscript = new ExecuteQuery(TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
+				selecteditmanuscript.setFilter("code", Operator.EQUALS, editdeployedCode);
+				ExecuteQuery selecteditschedules = new ExecuteQuery(TABLE_NAME_DEPLOYED_SCHEDULES, dao);
+				selecteditschedules.setFilter("deployed_code", Operator.EQUALS, editdeployedCode);
+				ManuscriptScedule editSchedule = new ManuscriptScedule(dao.select(selecteditschedules).get(0), dao.select(selecteditmanuscript));
+
+				SceduleComparing comparing = new SceduleComparing(originSchedule, editSchedule);
+				session.setAttribute("genpon_schedule", originSchedule);
+				session.setAttribute("old_schedule", editSchedule);
+				session.setAttribute("new_schedule", comparing.getNewSchedule());
+
+			}
 		} catch (DAOException e) {
 			e.printStackTrace();
 		}
@@ -297,7 +333,6 @@ public class FittingServlet extends MainServlet {
 
 		for (String deployCode : deployCodes) {
 
-			List<CodeHeader> codeHeaders = NameJudging.judgeAttribute(deployCode);
 			ExecuteQuery selectInsertedData = new ExecuteQuery(TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
 			ScenarioUtil.mappingArrayList(dao.select(selectInsertedData), map -> (String) map.get("code"));
 			if (!ScenarioUtil.mappingArrayList(dao.select(selectInsertedData), map -> (String) map.get("code")).contains(deployCode) || !tableName.equals(TABLE_NAME_SCHEDULE_MANUSCRIPT)) {
@@ -305,16 +340,20 @@ public class FittingServlet extends MainServlet {
 				ExecuteQuery deployCodeSelect = new ExecuteQuery(tableName, dao, Arrays.asList("code", "name", "arr", "dep"));
 				deployCodeSelect.setFilter("code", Operator.EQUALS, deployCode);
 				List<Map<String, Object>> schedules = dao.select(deployCodeSelect);
+				List<String> scheduleNames = ScenarioUtil.mappingArrayList(schedules, schedule -> (String) schedule.get("name"));
 				String shubetsu = "";
 				String orthodoxShubetsu = "";
 				String ikisaki = (String) schedules.get(schedules.size() - 1).get("name");
+				int ischangeLimitedExpress_in_SH01 = 1;
+
+				List<CodeHeader> codeHeaders = NameJudging.judgeAttribute(deployCode, scheduleNames);
 
 				// ヘッダーごとの処理
 				for (CodeHeader codeHeader : codeHeaders) {
 					String namelistTableName = (NAMELIST + ＿ + codeHeader.toString()).toLowerCase();
 
 					List<String> nameList = ScenarioUtil.mappingArrayList(dao.select(new ExecuteQuery(namelistTableName, dao, Arrays.asList("name"))), map -> (String) map.get("name"));
-					String insertTableName = (HEADER + ＿ + codeHeader.toString() + ＿ + "direction").toLowerCase();
+					String insertTableName = (HEADER + ＿ + codeHeader.toString() + ＿ + DIRECTION).toLowerCase();
 					if (deployCode.endsWith("A")) {
 						insertTableName = insertTableName + "a";
 					} else if (deployCode.endsWith("B")) {
@@ -341,6 +380,15 @@ public class FittingServlet extends MainServlet {
 					if (codeHeader.toString().equals(deployCode.substring(0, 2))) {
 						orthodoxShubetsu = shubetsu;
 					}
+					if ((codeHeader.equals(CodeHeader.TY) || codeHeader.equals(CodeHeader.MG)) && scheduleNames.contains(NumberingNameList.SH01) && shubetsu.equals(Shubetsu.急行.toString())) {
+						ischangeLimitedExpress_in_SH01++;
+					}
+					if (codeHeader.equals(CodeHeader.SO) && scheduleNames.contains(NumberingNameList.SH01) && shubetsu.equals(Shubetsu.特急.toString())) {
+						ischangeLimitedExpress_in_SH01++;
+					}
+					if (ischangeLimitedExpress_in_SH01 >= 3) {
+						orthodoxShubetsu = Shubetsu.相特急行.toString();
+					}
 					insertValues.add(shubetsu);//shubetsuの値挿入
 					insertValues.add(ikisaki);//ikisakiの値挿入
 
@@ -354,7 +402,6 @@ public class FittingServlet extends MainServlet {
 							insertValues.add(depTime);
 						}
 					});
-
 					insert.setInsertValue(insertValues);
 					dao.insert(insert);
 				}
@@ -369,13 +416,6 @@ public class FittingServlet extends MainServlet {
 				insert.setInsertValue(insertValue);
 				executeMessage.add(dao.insert(insert));
 				place = deployCode;
-			} else {
-				System.out.println(ScenarioUtil.mappingArrayList(dao.select(selectInsertedData), map -> (String) map.get("code")));
-				System.out.println("deployCode :" + deployCode);
-				System.out.println("tableName :" + tableName);
-				System.out.println(!ScenarioUtil.mappingArrayList(dao.select(selectInsertedData), map -> (String) map.get("code")).contains(deployCode));
-				System.out.println(!tableName.equals(TABLE_NAME_SCHEDULE_MANUSCRIPT));
-
 			}
 
 		}
@@ -387,7 +427,6 @@ public class FittingServlet extends MainServlet {
 			executeMessage.stream().forEachOrdered(msg -> Integer.parseInt(msg));
 			return "deployが" + executeMessage.size() + "件完了しました。";
 		} catch (Exception e) {
-			System.out.println(e.getClass());
 			return "deployで" + place + "に不備が見つかりました。";
 		}
 	}
