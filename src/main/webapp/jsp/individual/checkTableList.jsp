@@ -34,13 +34,7 @@
 	</form>
 	<br />
 
-	<c:if test="${!empty selectedData}">
-		<jsp:include page="/jsp/individual/details.jsp"></jsp:include>
-	</c:if>
-	<c:if test="${!empty deployed_schedule_list}">
-		<jsp:include page="/jsp/individual/deployed_schedule_list.jsp"></jsp:include>
-	</c:if>
-	<br />
+
 	<c:if test="${!empty table_names}">
 		<jsp:include page="/jsp/individual/efuPAIHA_TABLEs.jsp"></jsp:include>
 	</c:if>
@@ -48,6 +42,15 @@
 	<c:if test="${! empty genpon_schedule}">
 		<jsp:include page="/jsp/individual/compare.jsp"></jsp:include>
 	</c:if>
+	<br />
+
+	<c:if test="${!empty deployed_schedule_list}">
+		<jsp:include page="/jsp/individual/deployed_schedule_list.jsp"></jsp:include>
+	</c:if>
+	<c:if test="${!empty selectedData}">
+		<jsp:include page="/jsp/individual/details.jsp"></jsp:include>
+	</c:if>
+
 	<br />
 </body>
 </html>

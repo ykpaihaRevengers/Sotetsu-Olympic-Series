@@ -8,6 +8,23 @@
 <title>テーブル一覧</title>
 </head>
 <body>
+	<h5>コードの比較</h5>
+	<form action="/base/FittingServlet?action=compare" method="post">
+		<input type="hidden" name="page" value="individual/checkTableList.jsp"> <input type="hidden" name="compareSchedules" value="compareSchedules">
+		<div style="display: inline-flex">
+			原本：<select name="origin_code">
+				<c:forEach items="${deployed_schedule_list}" var="record">
+					<option value="${record.deployed_code}">${record.deployed_code}</option>
+				</c:forEach>
+			</select>編集対象： <select name="edit_code">
+				<c:forEach items="${deployed_schedule_list}" var="record">
+					<option value="${record.deployed_code}">${record.deployed_code}</option>
+				</c:forEach>
+			</select> <input type="submit" value="比較">
+		</div>
+
+	</form>
+	<br>
 	<table border="1">
 		<tr>
 			<th>コード</th>
@@ -40,21 +57,6 @@
 			</tr>
 		</c:forEach>
 	</table>
-	<h5>コードの比較</h5>
-	<form action="/base/FittingServlet?action=compare" method="post">
-		<input type="hidden" name="page" value="individual/checkTableList.jsp"> <input type="hidden" name="compareSchedules" value="compareSchedules">
-		<div style="display: inline-flex">
-			原本：<select name="origin_code">
-				<c:forEach items="${deployed_schedule_list}" var="record">
-					<option value="${record.deployed_code}">${record.deployed_code}</option>
-				</c:forEach>
-			</select>編集対象： <select name="edit_code">
-				<c:forEach items="${deployed_schedule_list}" var="record">
-					<option value="${record.deployed_code}">${record.deployed_code}</option>
-				</c:forEach>
-			</select> <input type="submit" value="比較">
-		</div>
 
-	</form>
 </body>
 </html>

@@ -29,8 +29,8 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 			}
 		}
 
-		public char getDirKey(Direction dir) {
-			return dir.toString().charAt(1);
+		public String getDirKey(Direction dir) {
+			return dir.toString();
 		}
 	}
 
@@ -119,7 +119,9 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 		if (contentContains(nameList, false, SI05, SI37, SI39)) {
 			return CodeHeader.SI + "r";
 		}
-
+		if (contentContains(nameList, false, SI40, SI41) && contentNotContains(nameList, SI17)) {
+			return CodeHeader.SI + "b";
+		}
 		if (contentContains(nameList, false, TJ10, TJ22, TJ26, TJ30, TJ33) && contentNotContains(nameList, YF06)) {
 			if (contentContains(nameList, false, TJ39, TJ47)) {
 				return CodeHeader.TJ + "d";
@@ -351,6 +353,9 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 
 		if (codeHeader.equals(CodeHeader.TY)) {
 			if (contentNotContains(scheduleNames, TY02, TY04, TY06, TY10)) {
+				if (deployCode.startsWith(CodeHeader.YF.toString()) && contentContains(scheduleNames, false, YF06)) {
+					return Shubetsu.各駅停車;
+				}
 				if (contentNotContains(scheduleNames, TY03, F15)) {
 					return Shubetsu.S_TRAIN;
 				}
@@ -364,6 +369,9 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 					}
 				} else {
 					if (contentNotContains(scheduleNames, F14, YF04)) {
+						if (contentNotContains(scheduleNames, F13)) {
+							return Shubetsu.TY急行;
+						}
 						return Shubetsu.急行;
 					} else if (contentNotContains(scheduleNames, F14)) {
 						return Shubetsu.通勤急行;
@@ -383,6 +391,9 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 				}
 				return Shubetsu.急行;
 			} else {
+				if (contentNotContains(scheduleNames, TY10, TY12)) {
+					return Shubetsu.急行;
+				}
 				return Shubetsu.各駅停車;
 			}
 		}
@@ -422,8 +433,14 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 
 		if (codeHeader.equals(CodeHeader.TJ)) {
 
-			if (deployCode.startsWith(CodeHeader.TY.toString()) && contentNotContains(scheduleNames, TJ12, TJ14, TJ18)) {
-				return Shubetsu.ゑふраїна;
+			if (!deployCode.startsWith(CodeHeader.TJ.toString())) {
+				if (deployCode.startsWith(CodeHeader.TY.toString()) && contentNotContains(scheduleNames, TJ12, TJ14, TJ18)) {
+					return Shubetsu.ゑふраїна;
+				}
+				if (contentNotContains(scheduleNames, TJ15, TJ16, TJ17)) {
+					return Shubetsu.急行;
+				}
+				return Shubetsu.各駅停車;
 			}
 
 			if (contentContains(scheduleNames, true, BKLO, TJ18) && contentNotContains(scheduleNames, TJ13, TJ14)) {
@@ -457,7 +474,32 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 				return Shubetsu.Laview;
 			}
 
-			if (contentNotContains(scheduleNames, SI06)) {
+			if (!deployCode.startsWith(CodeHeader.SI.toString())) {
+
+				if (deployCode.contains(CodeHeader.YF.toString()) && contentContains(scheduleNames, true, SI12) && contentNotContains(scheduleNames, SI11, SI13)) {
+					return Shubetsu.S_TRAIN;
+				}
+
+				if (deployCode.contains(CodeHeader.TY.toString()) && contentContains(scheduleNames, true, SI10, SI17) && contentNotContains(scheduleNames, SI06, SI13)) {
+					return Shubetsu.S_TRAIN;
+				}
+
+				if (deployCode.contains(CodeHeader.TY.toString()) && contentNotContains(scheduleNames, SI38, SI07, SI08, SI09, SI12, SI16)
+						&& contentContains(scheduleNames, true, SI06, SI10, SI13, SI17)) {
+					return Shubetsu.ゑふраїна;
+				}
+
+				if (contentContains(scheduleNames, true, SI06, SI10) && contentNotContains(scheduleNames, SI07, SI08, SI09)) {
+					if (contentContains(scheduleNames, true, SI06, SI10, SI13) && contentNotContains(scheduleNames, SI11, SI12)) {
+						return Shubetsu.快速;
+					}
+					return Shubetsu.準急;
+				}
+				return Shubetsu.各駅停車;
+
+			}
+
+			if (contentNotContains(scheduleNames, SI06) && contentContains(scheduleNames, false, BKLO)) {
 				if (contentNotContains(scheduleNames, SI18)) {
 					return Shubetsu.快速急行;
 				}
@@ -477,7 +519,7 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 					return Shubetsu.快速;
 				}
 			}
-			if (contentContains(scheduleNames, true, SI07, SI08) && contentNotContains(scheduleNames, SI02, SI03)) {
+			if (deployCode.startsWith(CodeHeader.SI.toString()) && contentContains(scheduleNames, true, SI07, SI08) && contentNotContains(scheduleNames, SI02, SI03)) {
 				return Shubetsu.区間準急;
 			}
 
@@ -487,14 +529,6 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 
 			if (deployCode.startsWith("SId")) {
 				return Shubetsu.普通;
-			}
-
-			if (deployCode.contains(CodeHeader.YF.toString()) && contentContains(scheduleNames, true, SI12) && contentNotContains(scheduleNames, SI11, SI13)) {
-				return Shubetsu.S_TRAIN;
-			}
-
-			if (deployCode.contains(CodeHeader.TY.toString()) && contentContains(scheduleNames, true, SI10) && contentNotContains(scheduleNames, SI13)) {
-				return Shubetsu.S_TRAIN;
 			}
 
 			return Shubetsu.各駅停車;
