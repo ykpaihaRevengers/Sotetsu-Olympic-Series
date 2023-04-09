@@ -1,9 +1,13 @@
 package usr.УкраїнаRevengers.servlet;
 
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -246,22 +250,59 @@ public class FittingServlet extends MainServlet {
 			if (actionEquals(action, "deleteCode")) {
 				String deployedCode = getRequestParameter(request, "deployed_code");
 
-				for (CodeHeader header : CodeHeader.values()) {
-					//レコードの削除
-					Delete delete = new Delete(HEADER + ＿ + header.toString() + ＿ + DIRECTION + deployedCode.substring(deployedCode.length() - 1), dao);
-					delete.setFilters("code", Operator.EQUALS, deployedCode);
-					dao.delete(delete);
+				if (getRequestParameter(request, "filterColumn").equals("code")) {
+					for (CodeHeader header : CodeHeader.values()) {
+						//レコードの削除
+						Delete delete = new Delete(HEADER + ＿ + header.toString() + ＿ + DIRECTION + deployedCode.substring(deployedCode.length() - 1), dao);
+						delete.setFilters("code", Operator.EQUALS, deployedCode);
+						dao.delete(delete);
+					}
+
+					Delete deleteDeployedSchedules = new Delete(TABLE_NAME_DEPLOYED_SCHEDULES, dao);
+					deleteDeployedSchedules.setFilters("deployed_code", Operator.EQUALS, deployedCode);
+					dao.delete(deleteDeployedSchedules);
+
+					Delete deleteManuscriptInserted = new Delete(TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
+					deleteManuscriptInserted.setFilters("code", Operator.EQUALS, deployedCode);
+					dao.delete(deleteManuscriptInserted);
+
+					request.setAttribute("execute_message", "コード番号：" + deployedCode + "を削除しました。");
+				} else if (getRequestParameter(request, "filterColumn").equals("deployed_timestamp")) {
+
+					String deployedTimeYYMMDDHH24MI = getRequestParameter(request, "deployed_time");
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
+					Date from = sdf.parse(deployedTimeYYMMDDHH24MI);
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(sdf.parse(deployedTimeYYMMDDHH24MI));
+					calendar.add(Calendar.SECOND, 75);
+					Date to = calendar.getTime();
+					deployedTimeYYMMDDHH24MI = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(from);
+					String deployedTimeYYMMDDHH24MIextent = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(to);
+					ExecuteQuery selectSchedules = new ExecuteQuery(TABLE_NAME_DEPLOYED_SCHEDULES, dao, Arrays.asList("deployed_code"));
+					selectSchedules.setFilter("deployed_timestamp", Operator.gE, deployedTimeYYMMDDHH24MI);
+					selectSchedules.setFilter("deployed_timestamp", Operator.lT, deployedTimeYYMMDDHH24MIextent);
+
+					List<String> deployCodes = ScenarioUtil.mappingArrayList(dao.select(selectSchedules), map -> (String) map.get("deployed_code"));
+
+					int deleteCount = 0;
+					for (String code : deployCodes) {
+						for (CodeHeader header : CodeHeader.values()) {
+							//レコードの削除
+							Delete delete = new Delete(HEADER + ＿ + header.toString() + ＿ + DIRECTION + code.substring(code.length() - 1), dao);
+							delete.setFilters("code", Operator.EQUALS, code);
+							dao.delete(delete);
+						}
+
+						Delete deleteDeployedSchedules = new Delete(TABLE_NAME_DEPLOYED_SCHEDULES, dao);
+						deleteDeployedSchedules.setFilters("deployed_code", Operator.EQUALS, code);
+						dao.delete(deleteDeployedSchedules);
+
+						Delete deleteManuscriptInserted = new Delete(TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
+						deleteManuscriptInserted.setFilters("code", Operator.EQUALS, code);
+						deleteCount += Integer.parseInt(dao.delete(deleteManuscriptInserted));
+					}
+					request.setAttribute("execute_message", "以下のコードが無事にundeployされました。" + deployCodes + " undeploy件数：" + deleteCount + "件");
 				}
-
-				Delete deleteDeployedSchedules = new Delete(TABLE_NAME_DEPLOYED_SCHEDULES, dao);
-				deleteDeployedSchedules.setFilters("deployed_code", Operator.EQUALS, deployedCode);
-				dao.delete(deleteDeployedSchedules);
-
-				Delete deleteManuscriptInserted = new Delete(TABLE_NAME_SCHEDULE_MANUSCRIPT_INSERTED, dao);
-				deleteManuscriptInserted.setFilters("code", Operator.EQUALS, deployedCode);
-				dao.delete(deleteManuscriptInserted);
-
-				request.setAttribute("execute_message", "コード番号：" + deployedCode + "を削除しました。");
 			}
 
 			if (actionEquals(action, "compare")) {
@@ -287,6 +328,9 @@ public class FittingServlet extends MainServlet {
 
 			}
 		} catch (DAOException e) {
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO 自動生成された catch ブロック
 			e.printStackTrace();
 		}
 		//ページへの転送

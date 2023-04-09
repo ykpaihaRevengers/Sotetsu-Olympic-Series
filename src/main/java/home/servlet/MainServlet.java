@@ -88,7 +88,7 @@ public class MainServlet extends HttpServlet {
 	 * @throws IOException
 	 */
 	public static String getRequestParameter(HttpServletRequest request, String parameterTagName) {
-		return Optional.ofNullable(request.getParameter(parameterTagName)).orElse(Optional.ofNullable((String) request.getSession().getAttribute(parameterTagName)).orElse(""));
+		return Optional.ofNullable(request.getParameter(parameterTagName)).orElse(Optional.ofNullable(request.getSession().getAttribute(parameterTagName)).orElse("").toString());
 	}
 
 	/**

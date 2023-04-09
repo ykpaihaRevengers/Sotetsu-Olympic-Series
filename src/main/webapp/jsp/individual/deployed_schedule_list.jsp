@@ -51,12 +51,19 @@
 				<td></td>
 				<td>
 					<form action="/base/FittingServlet?action=deleteCode" method="post">
-						<input type="hidden" name="deployed_code" value="${record.deployed_code}"> <input type="submit" value="削除"><input type="hidden" name="page" value="individual/checkTableList.jsp">
+						<input type="hidden" name="filterColumn" value="code"> <input type="hidden" name="deployed_code" value="${record.deployed_code}"> <input type="submit" value="削除"><input
+							type="hidden" name="page" value="individual/checkTableList.jsp">
 					</form>
 				</td>
 			</tr>
 		</c:forEach>
 	</table>
+
+	<form action="/base/FittingServlet?action=deleteCode" method="post">
+		<p>日付からスケジュールクラスタ単位で削除</p>
+		<input type="hidden" name="filterColumn" value="deployed_timestamp"> <input type="hidden" name="deployed_code" value="${record.deployed_code}"> <input type="text"
+			name="deployed_time"> <input type="submit" value="削除"><input type="hidden" name="page" value="individual/checkTableList.jsp">
+	</form>
 
 </body>
 </html>

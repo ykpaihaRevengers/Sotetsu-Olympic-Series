@@ -24,6 +24,7 @@ import dbmng.bean.CreateTable;
 import dbmng.bean.CreateTemporaryTable;
 import dbmng.bean.Delete;
 import dbmng.bean.ExecuteQuery;
+import dbmng.bean.ExecuteQuery.Filters;
 import dbmng.bean.ExecuteUpdate.Filter;
 import dbmng.bean.Insert;
 import dbmng.bean.Update;
@@ -257,7 +258,7 @@ public class MainDAO implements AutoCloseable {
 			return Date.valueOf(value);
 		} else if (dataType.equals("time without time zone")) {
 			return ScenarioUtil.timeValueOf(value);
-		} else if (dataType.equals("timestamp")) {
+		} else if (dataType.equals("timestamp without time zone")) {
 			return Timestamp.valueOf(value);
 		} else {
 			return value;
@@ -583,7 +584,7 @@ public class MainDAO implements AutoCloseable {
 
 		if (ScenarioUtil.checkList(select.getFilter())) {
 			sql = new StringBuffer(sql).append(WHERE).toString()
-					+ String.join(AND, select.getFilter().stream().map(where -> where.getFilterColumn() + " " + where.getOperator() + " ?").collect(Collectors.toList()));
+					+ String.join(AND, select.getFilter().stream().map(where -> where.getFilterColumn() + " " + where.getOperator() + toTimeStamp(where)).collect(Collectors.toList()));
 			select.getFilter().stream().map(f -> f.getPlaceholder()).forEachOrdered(placeHolders::add);
 		}
 
@@ -605,6 +606,7 @@ public class MainDAO implements AutoCloseable {
 		}
 
 		sql = sql + WITH_UR;
+
 		//SQLの実行
 		try (ResultSet rs = executeQuery(sql, placeHolders);) {
 			List<Map<String, Object>> selectedRecords = new ArrayList<>();
@@ -635,6 +637,13 @@ public class MainDAO implements AutoCloseable {
 			throw new DAOException("テーブルの選択に失敗しました");
 		}
 
+	}
+
+	private String toTimeStamp(Filters filter) {
+		if (filter.getPlaceholder() instanceof Timestamp) {
+			return " TO_TIMESTAMP( ? ,'YYYY-MM-DD HH24:MI:SS')";
+		}
+		return " ?";
 	}
 
 	@Override

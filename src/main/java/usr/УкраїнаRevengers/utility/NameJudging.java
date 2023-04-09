@@ -74,10 +74,10 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 			return CodeHeader.五輪.toString();
 		}
 
-		if (contentContains(nameList, true, SO01, SO10)) {
+		if (contentContains(nameList, true, SO01, SO08) && contentNotContains(nameList, SH01)) {
 			return CodeHeader.SO + "k";
 		}
-		if (contentContains(nameList, true, SO37)) {
+		if (contentContains(nameList, true, SO37) && contentNotContains(nameList, SH01)) {
 			return CodeHeader.SO + "z";
 		}
 
@@ -123,12 +123,12 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 			return CodeHeader.SI + "b";
 		}
 		if (contentContains(nameList, false, TJ10, TJ22, TJ26, TJ30, TJ33) && contentNotContains(nameList, YF06)) {
-			if (contentContains(nameList, false, TJ39, TJ47)) {
+			if (contentContains(nameList, false, TJ39, TJ47, TJ30, TJ33) && contentNotContains(nameList, TJ21, TJ22)) {
 				return CodeHeader.TJ + "d";
 			}
 			return CodeHeader.TJ + "k";
 		}
-		throw new NullPointerException("該当なし");
+		throw new NullPointerException(nameList + "該当なし");
 	}
 
 	public static String judgeFooter(List<String> nameList) {
@@ -218,6 +218,10 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 
 			if (contentContains(nameList, true, SJK, Tokyo2020_Olympic_Gateway)) {
 				return judgeDirection(nameList, SJK, Tokyo2020_Olympic_Gateway);
+			}
+
+			if (contentContains(nameList, true, TJ30, TJ33)) {
+				return judgeDirection(nameList, TJ33, TJ30);
 			}
 		}
 		return false;
@@ -345,7 +349,7 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 	public static Shubetsu judgeShubetsu(CodeHeader codeHeader, String deployCode, List<String> scheduleNames) {
 
 		if (deployCode.contains(CodeHeader.五輪.toString())) {
-			if (contentNotContains(scheduleNames, SO09, SO11)) {
+			if (codeHeader.equals(CodeHeader.SO) && contentNotContains(scheduleNames, SO09, SO11)) {
 				return Shubetsu.オリンピックライン特急;
 			}
 			return Shubetsu.オリンピックライン;
@@ -392,6 +396,9 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 				return Shubetsu.急行;
 			} else {
 				if (contentNotContains(scheduleNames, TY10, TY12)) {
+					if (contentNotContains(scheduleNames, MG01, NI02) && contentContains(scheduleNames, false, NI03)) {
+						return Shubetsu.各駅停車;
+					}
 					return Shubetsu.急行;
 				}
 				return Shubetsu.各駅停車;
@@ -534,6 +541,7 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 			return Shubetsu.各駅停車;
 
 		}
+
 		return null;
 
 	}
@@ -788,7 +796,7 @@ public class NameJudging implements NumberingNameList, DirectionsList {
 				return PASS;
 			}
 		}
-		throw new NullPointerException("該当なし");
+		throw new NullPointerException(codeHeader + columnKey + " " + "該当なし");
 	}
 
 }
